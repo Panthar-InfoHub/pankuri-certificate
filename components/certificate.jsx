@@ -9,7 +9,7 @@ const islandMomentsFont = Island_Moments({
 });
 
 
-export default function Certificate() {
+export default function Certificate(certificateProps) {
   return (
     <div className="min-h-screen bg-white p-4 sm:p-8 md:p-12 lg:p-16 flex items-center justify-center">
       <div className="w-full max-w-4xl border border-gray-300 shadow-lg overflow-hidden relative">
@@ -42,15 +42,15 @@ export default function Certificate() {
         {/* Middle Section - White */}
         <div className="bg-white text-center py-16 px-8">
           <p className="text-xl sm:text-2xl md:text-3xl font-serif mb-8">This certificate is proudly presented to</p>
-          <div className="border-b border-gray-400 w-3/4 mx-auto mb-12 h-8"></div> {/* Line for name */}
+          <div className="border-b border-gray-400 w-3/4 mx-auto mb-12 h-8">{certificateProps.Name}</div> {/* Line for name */}
           <p className="text-xl sm:text-2xl md:text-3xl font-serif mb-4">For Successful Completion of The Course</p>
-          <p className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold">Basic Resin Art : Masterclass</p>
+          <p className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold">{certificateProps.Name}</p>{/*Course name */}
         </div>
 
         {/* Bottom Section - White with Date, Signature, and Seal */}
         <div className="bg-white py-16 px-8 flex flex-col sm:flex-row items-center justify-around gap-8">
           <div className="flex flex-col items-center">
-            <div className="border-b border-gray-400 w-48 mb-2 h-8"></div>
+            <div className="border-b border-gray-400 w-48 mb-2 h-8">{certificateProps.Name}</div>{/*Date*/}
             <p className="text-lg font-serif">Date</p>
           </div>
           <div className="flex-shrink-0">
@@ -71,3 +71,6 @@ export default function Certificate() {
     </div>
   )
 }
+
+
+  
