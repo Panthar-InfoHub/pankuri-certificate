@@ -94,8 +94,8 @@ export default function DisplayCsvPage() {
         </p>
       )}
 
-      <Button className="mt-10 py-6 px-8 text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 ease-in-out bg-green-600 hover:bg-green-700 text-white">
-        Generate Certificate (No Functionality)
+      <Button onClick={handleClick} className="mt-10 py-6 px-8 text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 ease-in-out bg-green-600 hover:bg-green-700 text-white">
+        Generate Certificate
       </Button>
     </main>
   )

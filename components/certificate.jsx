@@ -1,9 +1,7 @@
-import Image from "next/image"
-import { Ballet } from "next/font/google"
-import { Island_Moments } from "next/font/google";
-import { Weight } from "lucide-react"
+import { My_Soul } from "next/font/google";
+import Image from "next/image";
 
-const islandMomentsFont = Island_Moments({
+const mySoulFont = My_Soul({
   subsets: ["latin"],
   weight: "400", 
 });
@@ -17,8 +15,8 @@ export default function Certificate(certificateProps) {
         <div className="bg-[#040159] text-white text-center py-16 px-8 relative z-10">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-serif tracking-widest mb-2">ACADMA</h2>
           <h1
-            className={` ${islandMomentsFont.className} text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold italic leading-none mb-4 `}
-            style={{ fontFamily: "serif" }}
+            className={` ${mySoulFont.className} text-5xl sm:text-6xl md:text-8~xl lg:text-8xl font-bold italic leading-none mb-4 `}
+            
           >
             Certificate
           </h1>
@@ -31,11 +29,11 @@ export default function Certificate(certificateProps) {
           {/* -mt-1 to slightly overlap for seamless look */}
           <div
             className="bg-[#c8b100] w-[48%] h-full"
-            style={{ clipPath: "polygon(0 0, 100% 0, 90% 100%, 0% 100%)" }}
+            style={{ clipPath: "polygon(0 0, 100% 0, 90% 60%, 0% 60%)" }}
           ></div>
           <div
             className="bg-[#c8b100] w-[48%] h-full"
-            style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 10% 100%)" }}
+            style={{ clipPath: "polygon(10% 60%, 100% 60%, 100% 0, 0 0)" }}
           ></div>
         </div>
 
@@ -44,13 +42,13 @@ export default function Certificate(certificateProps) {
           <p className="text-xl sm:text-2xl md:text-3xl font-serif mb-8">This certificate is proudly presented to</p>
           <div className="border-b border-gray-400 w-3/4 mx-auto mb-12 h-8">{certificateProps.Name}</div> {/* Line for name */}
           <p className="text-xl sm:text-2xl md:text-3xl font-serif mb-4">For Successful Completion of The Course</p>
-          <p className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold">{certificateProps.Name}</p>{/*Course name */}
+          <p className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold">{certificateProps.Course}</p>{/*Course name */}
         </div>
 
         {/* Bottom Section - White with Date, Signature, and Seal */}
         <div className="bg-white py-16 px-8 flex flex-col sm:flex-row items-center justify-around gap-8">
           <div className="flex flex-col items-center">
-            <div className="border-b border-gray-400 w-48 mb-2 h-8">{certificateProps.Name}</div>{/*Date*/}
+            <div className="border-b border-gray-400 w-48 mb-2 h-8">{certificateProps.Date}</div>{/*Date*/}
             <p className="text-lg font-serif">Date</p>
           </div>
           <div className="flex-shrink-0">
