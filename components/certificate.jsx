@@ -1,68 +1,208 @@
-import { My_Soul } from "next/font/google";
-import Image from "next/image";
-
-const mySoulFont = My_Soul({
-  subsets: ["latin"],
-  weight: "400", 
-});
-
-
-export default function Certificate(certificateProps) {
+export default function Certificate({ name = "Gagan", course = "Btech", date = "26*8/85" }) {
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-8 md:p-12 lg:p-16 flex items-center justify-center">
-      <div className="w-full max-w-4xl border border-gray-300 shadow-lg overflow-hidden relative">
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'white',
+      padding: '64px 32px', // lg:p-16 equivalent
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '896px', // max-w-4xl
+        border: '1px solid #d1d5db', // border-gray-300
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', // shadow-lg
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
         {/* Top Section - Dark Blue */}
-        <div className="bg-[#040159] text-white text-center py-16 px-8 relative z-10">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif tracking-widest mb-2">ACADMA</h2>
-          <h1
-            className={` ${mySoulFont.className} text-5xl sm:text-6xl md:text-8~xl lg:text-8xl font-bold italic leading-none mb-4 `}
-            
-          >
+        <div style={{
+          backgroundColor: '#040159',
+          color: 'white',
+          textAlign: 'center',
+          padding: '64px 32px', // py-16 px-8
+          position: 'relative',
+          zIndex: 10
+        }}>
+          <h2 style={{
+            fontSize: '30px', // md:text-3xl
+            fontFamily: 'serif',
+            letterSpacing: '0.25em', // tracking-widest
+            marginBottom: '8px',
+            margin: '0 0 8px 0'
+          }}>
+            ACADMA
+          </h2>
+          <h1 style={{
+            fontFamily: "'My Soul', cursive", // My_Soul font with fallback
+            fontSize: '128px', // lg:text-8xl
+            fontWeight: 'bold',
+            fontStyle: 'italic',
+            lineHeight: '1', // leading-none
+            marginBottom: '16px',
+            margin: '0 0 16px 0'
+          }}>
             Certificate
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl font-serif tracking-widest">OF APPRECIATION</p>
+          <p style={{
+            fontSize: '24px', // md:text-2xl
+            fontFamily: 'serif',
+            letterSpacing: '0.25em', // tracking-widest
+            margin: '0'
+          }}>
+            OF APPRECIATION
+          </p>
         </div>
 
         {/* Gold Ribbon Shapes */}
-        <div className="relative flex justify-between h-12 -mt-1">
-          {" "}
-          {/* -mt-1 to slightly overlap for seamless look */}
-          <div
-            className="bg-[#c8b100] w-[48%] h-full"
-            style={{ clipPath: "polygon(0 0, 100% 0, 90% 60%, 0% 60%)" }}
-          ></div>
-          <div
-            className="bg-[#c8b100] w-[48%] h-full"
-            style={{ clipPath: "polygon(10% 60%, 100% 60%, 100% 0, 0 0)" }}
-          ></div>
+        <div style={{
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'space-between',
+          height: '48px', // h-12
+          marginTop: '-4px' // -mt-1
+        }}>
+          <div style={{
+            backgroundColor: '#c8b100',
+            width: '48%',
+            height: '100%',
+            clipPath: 'polygon(0 0, 100% 0, 90% 60%, 0% 60%)'
+          }}></div>
+          <div style={{
+            backgroundColor: '#c8b100',
+            width: '48%',
+            height: '100%',
+            clipPath: 'polygon(10% 60%, 100% 60%, 100% 0, 0 0)'
+          }}></div>
         </div>
 
         {/* Middle Section - White */}
-        <div className="bg-white text-center py-16 px-8">
-          <p className="text-xl sm:text-2xl md:text-3xl font-serif mb-8">This certificate is proudly presented to</p>
-          <div className="border-b border-gray-400 w-3/4 mx-auto mb-12 h-8">{certificateProps.Name}</div> {/* Line for name */}
-          <p className="text-xl sm:text-2xl md:text-3xl font-serif mb-4">For Successful Completion of The Course</p>
-          <p className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold">{certificateProps.Course}</p>{/*Course name */}
+        <div style={{
+          backgroundColor: 'white',
+          textAlign: 'center',
+          padding: '64px 32px' // py-16 px-8
+        }}>
+          <p style={{
+            fontSize: '30px', // md:text-3xl
+            fontFamily: 'serif',
+            marginBottom: '32px', // mb-8
+            margin: '0 0 32px 0'
+          }}>
+            This certificate is proudly presented to
+          </p>
+          <div style={{
+            borderBottom: '1px solid #9ca3af', // border-gray-400
+            width: '75%', // w-3/4
+            margin: '0 auto 48px auto', // mx-auto mb-12
+            height: '32px', // h-8
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '28px',
+            fontWeight: 'bold',
+            color: '#040159'
+          }}>
+            {name}
+          </div>
+          <p style={{
+            fontSize: '30px', // md:text-3xl
+            fontFamily: 'serif',
+            marginBottom: '16px', // mb-4
+            margin: '0 0 16px 0'
+          }}>
+            For Successful Completion of The Course
+          </p>
+          <p style={{
+            fontFamily: 'serif',
+            fontSize: '48px', // md:text-5xl
+            fontWeight: 'bold',
+            margin: '0',
+            color: '#040159'
+          }}>
+            {course}
+          </p>
         </div>
 
         {/* Bottom Section - White with Date, Signature, and Seal */}
-        <div className="bg-white py-16 px-8 flex flex-col sm:flex-row items-center justify-around gap-8">
-          <div className="flex flex-col items-center">
-            <div className="border-b border-gray-400 w-48 mb-2 h-8">{certificateProps.Date}</div>{/*Date*/}
-            <p className="text-lg font-serif">Date</p>
+        <div style={{
+          backgroundColor: 'white',
+          padding: '64px 32px', // py-16 px-8
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          gap: '32px', // gap-8
+          flexDirection: 'row',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <div style={{
+              borderBottom: '1px solid #9ca3af', // border-gray-400
+              width: '192px', // w-48
+              marginBottom: '8px', // mb-2
+              height: '32px', // h-8
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}>
+              {date}
+            </div>
+            <p style={{
+              fontSize: '18px', // text-lg
+              fontFamily: 'serif',
+              margin: '0'
+            }}>
+              Date
+            </p>
           </div>
-          <div className="flex-shrink-0">
-            <Image
-              src="/placeholder.svg?height=150&width=150"
-              alt="Award ribbon seal"
-              width={150}
-              height={150}
-              className="object-contain"
-            />
+
+          <div style={{
+            flexShrink: 0
+          }}>
+            {/* Award ribbon seal - CSS recreation */}
+            <div style={{
+              width: '150px',
+              height: '150px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              border: '8px solid #040159',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+            }}>
+              <img
+                src="/placeholder.svg?height=150&width=150"
+                alt="Award ribbon seal"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
           </div>
-          <div className="flex flex-col items-center">
-            <div className="border-b border-gray-400 w-48 mb-2 h-8"></div>
-            <p className="text-lg font-serif">Signature</p>
+
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <div style={{
+              borderBottom: '1px solid #9ca3af', // border-gray-400
+              width: '192px', // w-48
+              marginBottom: '8px', // mb-2
+              height: '32px' // h-8
+            }}></div>
+            <p style={{
+              fontSize: '18px', // text-lg
+              fontFamily: 'serif',
+              margin: '0'
+            }}>
+              Signature
+            </p>
           </div>
         </div>
       </div>
@@ -71,4 +211,3 @@ export default function Certificate(certificateProps) {
 }
 
 
-  

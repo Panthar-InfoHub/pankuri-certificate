@@ -1,15 +1,21 @@
 "use client" // This component needs client-side interactivity
 
-import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Loader2 } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
 export default function DisplayCsvPage() {
   const [csvData, setCsvData] = useState([])
   const [headers, setHeaders] = useState([])
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const [uploadLoading, setUploadLoading] = useState(false)
+
 
   useEffect(() => {
     const content = localStorage.getItem("uploadedCsvContent")
@@ -52,6 +58,35 @@ export default function DisplayCsvPage() {
     )
   }
 
+  const handleClick = async () => {
+    setUploadLoading(true)
+    try {
+      console.log("\n\n CSV data ==> ", csvData)
+
+      for (const item of csvData) {
+        const response = await fetch('/api/upload-certificate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ student: item }),
+        })
+
+        const res = await response.json()
+        console.log("certificate response ==> ", res)
+        if (res.success) {
+          toast.success(`Certificate of student name : ${item.name} send successfully`)
+        }
+      }
+      localStorage.removeItem("uploadedCsvContent")
+      setCsvData([])
+    } catch (error) {
+      toast.error("Error while sending certificate : ", error.message)
+    } finally {
+      setUploadLoading(false)
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-12 lg:p-24 bg-gradient-to-br from-gray-50 to-gray-100">
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 text-center">Uploaded CSV Content</h1>
@@ -87,16 +122,26 @@ export default function DisplayCsvPage() {
               </Table>
             </div>
           </CardContent>
+
+          <CardFooter>
+            <Button onClick={handleClick} disabled={uploadLoading} className="mt-10 py-6 px-8 text-lg font-semibold cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 ease-in-out bg-green-600 hover:bg-green-700 text-white">
+              {uploadLoading ? <> <Loader2 className="animate-spin" /> </> : "Generate Certificate"}
+            </Button>
+          </CardFooter>
         </Card>
       ) : (
-        <p className="text-lg text-muted-foreground text-center mt-8">
+        <p className="text-lg text-muted-foreground text-center mt-8 flex flex-col gap-5 justify-center items-center">
           No CSV data found or the file was empty. Please go back and upload a file.
+          <Button className="py-6 px-8 text-lg font-semibold cursor-pointer shadow-md hover:shadow-lg rounded-4xl transition-all duration-300 ease-in-out bg-green-600 hover:bg-green-700 text-white w-fit">
+            <Link href={"/"}  >
+              Home Page
+            </Link>
+          </Button>
+
         </p>
       )}
 
-      <Button onClick={handleClick} className="mt-10 py-6 px-8 text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 ease-in-out bg-green-600 hover:bg-green-700 text-white">
-        Generate Certificate
-      </Button>
+
     </main>
   )
 }

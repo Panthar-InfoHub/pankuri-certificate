@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import Mannual from "@/components/Mannual"
 
 export default function HomePage() {
   return (
@@ -10,18 +11,13 @@ export default function HomePage() {
       <p className="text-lg text-gray-600 mb-10 text-center max-w-prose">
         Choose how you'd like to input your data to get started.
       </p>
-      <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md">
+      <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md  items-center">
         <Link href="/upload" passHref>
           <Button className="w-full py-7 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 bg-primary text-primary-foreground hover:bg-primary/90">
             Upload a CSV File
           </Button>
         </Link>
-        <Button
-          className="w-full py-7 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 bg-secondary text-secondary-foreground hover:bg-secondary/90"
-          disabled
-        >
-          Enter Details Manually (Coming Soon)
-        </Button>
+        <Mannual />
       </div>
     </main>
   )
