@@ -1,19 +1,34 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Mannual from "@/components/Mannual"
+import { Upload } from "lucide-react"
 
 export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-24 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100">
-      <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-8 text-center leading-tight">
-        Welcome to the Acadma Certifation App
-      </h1>
-      <p className="text-lg text-gray-600 mb-10 text-center max-w-prose">
-        Choose how you'd like to input your data to get started.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md  items-center">
+      <div className="space-y-6">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
+          <span className=" ">
+            Academia
+          </span>
+          <br />
+          <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+            Certification
+          </span>
+          <br />
+          <span className="text-4xl sm:text-5xl lg:text-6xl">Platform</span>
+        </h1>
+
+        <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          The delightfully smart certification platform. Streamline your academic credentials with our modern,
+          intuitive interface.
+        </p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full">
         <Link href="/upload" passHref>
-          <Button className="w-full py-7 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button className="w-full cursor-pointer py-6 px-8 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-0 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-1">
+            <Upload className="mr-2 size-5" />
             Upload a CSV File
           </Button>
         </Link>

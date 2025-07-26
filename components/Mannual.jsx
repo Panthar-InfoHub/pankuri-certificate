@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2 } from "lucide-react"
+import { File, Loader2 } from "lucide-react"
 import { useActionState, useState } from "react"
 import toast from "react-hot-toast"
 
@@ -58,7 +58,10 @@ export default function Mannual() {
         <div className="flex items-center justify-center p-4">
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full py-7 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 bg-secondary cursor-pointer text-secondary-foreground hover:bg-secondary/90" >Enter Details Manually</Button>
+                    <Button className="w-full cursor-pointer py-6 px-8 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-0 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 transform hover:-translate-y-1">
+                        <File className="mr-2 size-5" />
+                        Enter Data Manually
+                    </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
