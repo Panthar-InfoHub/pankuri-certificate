@@ -45,7 +45,7 @@ export default function Mannual() {
             const res = await response.json()
             console.log("certificate response ==> ", res)
             if (res.success) {
-                toast.success(`Certificate of student name : ${item.name} send successfully`)
+                toast.success(`Certificate of student name : ${item.Name} send successfully`)
             }
         } catch (error) {
             toast.error("Error while sending certificate : ", error.message)
@@ -63,46 +63,77 @@ export default function Mannual() {
                         Enter Data Manually
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] bg-white border-gray-200 text-gray-900">
                     <DialogHeader>
-                        <DialogTitle>Course Registration</DialogTitle>
-                        <DialogDescription>Fill in the details below to register for a course.</DialogDescription>
+                        <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-[#FF69B4] to-[#8A2BE2] bg-clip-text text-transparent">
+                            Create Certificate
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-600">
+                            Fill in the details below to create a certificate.
+                        </DialogDescription>
                     </DialogHeader>
                     <form action={formAction}>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name" className="text-gray-700 font-medium">
+                                    Name
+                                </Label>
                                 <Input
                                     id="name"
                                     name="name"
                                     placeholder="Enter your full name"
                                     required
+                                    className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="course">Course</Label>
+                                <Label htmlFor="course" className="text-gray-700 font-medium">
+                                    Course
+                                </Label>
                                 <Input
                                     id="course"
                                     name="course"
                                     placeholder="Enter course name"
                                     required
+                                    className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="date">Date</Label>
+                                <Label htmlFor="date" className="text-gray-700 font-medium">
+                                    Date
+                                </Label>
                                 <Input
                                     id="date"
                                     name="date"
                                     type="date"
                                     required
+                                    className="bg-gray-50 border-gray-300 text-gray-900 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
                                 />
                             </div>
                         </div>
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                        <DialogFooter className="gap-2 py-4 w-full flex !justify-between !items-center">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setOpen(false)}
+                                className="border-gray-300 bg-white hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+                            >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isPending} > {isPending ? <> <Loader2 className="animate-spin" /> </> : "Submit"} </Button>
+                            <Button
+                                type="submit"
+                                disabled={isPending}
+                                className="bg-gradient-to-r from-[#8A2BE2] to-[#FF69B4] hover:from-[#943be7] hover:to-[#ff79bf] shadow-lg shadow-[#8A2BE2]/30 text-white"
+                            >
+                                {isPending ? (
+                                    <>
+                                        <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    "Submit"
+                                )}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

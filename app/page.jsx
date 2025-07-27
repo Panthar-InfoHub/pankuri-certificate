@@ -7,15 +7,13 @@ export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-24 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="space-y-6">
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight flex gap-6 items-center">
           <span className=" ">
             Academia
           </span>
-          <br />
           <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
             Certification
           </span>
-          <br />
           <span className="text-4xl sm:text-5xl lg:text-6xl">Platform</span>
         </h1>
 

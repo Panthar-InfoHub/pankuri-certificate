@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Loader2 } from "lucide-react"
+import { FileSpreadsheet, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -88,60 +88,84 @@ export default function DisplayCsvPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-12 lg:p-24 bg-gradient-to-br from-gray-50 to-gray-100">
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 text-center">Uploaded CSV Content</h1>
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900 relative overflow-hidden">
+      {/* Subtle background gradients for light mode */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 via-transparent to-orange-100/50 opacity-70" />
 
-      {csvData.length > 0 ? (
-        <Card className="w-full max-w-5xl shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-gray-800">CSV Data Preview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto max-h-[60vh] border rounded-md">
-              <Table>
-                <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
-                  <TableRow>
-                    {headers.map((header, index) => (
-                      <TableHead key={index} className="min-w-[120px] text-gray-700 font-bold text-left px-4 py-3">
-                        {header}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {csvData.map((row, rowIndex) => (
-                    <TableRow key={rowIndex} className="hover:bg-gray-50 transition-colors">
-                      {headers.map((header, colIndex) => (
-                        <TableCell key={colIndex} className="px-4 py-2 text-gray-800">
-                          {row[header]}
-                        </TableCell>
+      <div className="relative flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-12 lg:p-24">
+        <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-center text-gray-900">Uploaded CSV Content</h1>
+
+        {csvData.length > 0 ? (
+          <Card className="w-full max-w-6xl bg-white border-gray-200 shadow-xl">
+            <CardHeader className="bg-gray-50 border-b border-gray-200">
+              <CardTitle className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                <FileSpreadsheet className="h-6 w-6 text-[#8A2BE2]" />
+                CSV Data Preview
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="overflow-x-auto max-h-[60vh] border border-gray-200 rounded-lg bg-white">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-gray-100 z-10">
+                    <TableRow className="border-gray-200 hover:bg-transparent">
+                      {headers.map((header, index) => (
+                        <TableHead
+                          key={index}
+                          className="min-w-[120px] text-gray-700 font-bold text-left px-4 py-3 capitalize"
+                        >
+                          {header}
+                        </TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-
-          <CardFooter>
-            <Button onClick={handleClick} disabled={uploadLoading} className="mt-10 py-6 px-8 text-lg font-semibold cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 ease-in-out bg-green-600 hover:bg-green-700 text-white">
-              {uploadLoading ? <> <Loader2 className="animate-spin" /> </> : "Generate Certificate"}
+                  </TableHeader>
+                  <TableBody>
+                    {csvData.map((row, rowIndex) => (
+                      <TableRow
+                        key={rowIndex}
+                        className="border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        {headers.map((header, colIndex) => (
+                          <TableCell key={colIndex} className="px-4 py-3 text-gray-800 font-medium">
+                            {row[header]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+            <CardFooter className="bg-gray-50 border-t border-gray-200">
+              <Button
+                onClick={handleClick}
+                disabled={uploadLoading}
+                className="mt-4 py-6 px-8 text-lg font-semibold bg-gradient-to-r from-[#8A2BE2] to-[#FF69B4] hover:from-[#943be7] hover:to-[#ff79bf] shadow-lg shadow-[#8A2BE2]/30 text-white"
+              >
+                {uploadLoading ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                    Generating Certificates...
+                  </>
+                ) : (
+                  "Generate Certificates"
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        ) : (
+          <div className="text-center mt-8 space-y-6">
+            <p className="text-xl text-gray-600 max-w-md mx-auto">
+              No CSV data found or the file was empty. Please go back and upload a file.
+            </p>
+            <Button className="py-6 px-8 text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 shadow-lg text-white transition-all duration-300 transform hover:-translate-y-1">
+              <Link href="/" className="flex items-center gap-2">
+                <Home className="h-5 w-5" />
+                Home Page
+              </Link>
             </Button>
-          </CardFooter>
-        </Card>
-      ) : (
-        <p className="text-lg text-muted-foreground text-center mt-8 flex flex-col gap-5 justify-center items-center">
-          No CSV data found or the file was empty. Please go back and upload a file.
-          <Button className="py-6 px-8 text-lg font-semibold cursor-pointer shadow-md hover:shadow-lg rounded-4xl transition-all duration-300 ease-in-out bg-green-600 hover:bg-green-700 text-white w-fit">
-            <Link href={"/"}  >
-              Home Page
-            </Link>
-          </Button>
-
-        </p>
-      )}
-
-
+          </div>
+        )}
+      </div>
     </main>
   )
 }

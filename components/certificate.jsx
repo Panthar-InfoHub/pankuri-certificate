@@ -1,6 +1,9 @@
-export default function Certificate({ name = "Gagan", course = "Btech", date = "26*8/85" }) {
+export default function Certificate({ name = "Gagan", course = "Btech", date = "26*8/85", mode = "dev" }) {
+
+  const ribbonImgUrl = "https://res.cloudinary.com/dq6ubifli/image/upload/v1753638293/ribbon_aqdxld.png"
+
   return (
-    <div style={{
+    <div id="certificate-design" style={{
       minHeight: '100vh',
       backgroundColor: 'white',
       padding: '64px 32px', // lg:p-16 equivalent
@@ -127,7 +130,7 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
         {/* Bottom Section - White with Date, Signature, and Seal */}
         <div style={{
           backgroundColor: 'white',
-          padding: '64px 32px', // py-16 px-8
+          padding: '44px 32px 64px', // py-16 px-8
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-around',
@@ -162,27 +165,15 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
             </p>
           </div>
 
+          {/* Award ribbon seal - CSS recreation */}
           <div style={{
-            flexShrink: 0
+            position: 'relative',
           }}>
-            {/* Award ribbon seal - CSS recreation */}
-            <div style={{
-              width: '150px',
-              height: '150px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
-              border: '8px solid #040159',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-            }}>
-              <img
-                src="/placeholder.svg?height=150&width=150"
-                alt="Award ribbon seal"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
+            <img
+              src={mode === "server" ? ribbonImgUrl : "/ribbon.png"}
+              alt="Award_ribbon_seal"
+              style={{ width: "8rem", objectFit: "cover" }}
+            />
           </div>
 
           <div style={{
