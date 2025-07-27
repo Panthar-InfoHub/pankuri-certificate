@@ -6,28 +6,28 @@ import path from "path";
 import os from "os";
 
 export async function POST(request) {
-    try {
-        const { student } = await request.json();
+  try {
+    const { student } = await request.json();
 
-        console.debug("Student data ===> ", student)
-        const { Name: name, course, date } = student;
+    console.debug("Student data ===> ", student)
+    const { Name: name, course, date } = student;
 
-        if (!name || !course || !date) {
-            return NextResponse.json(
-                { success: false, message: "Missing required student data (name, course, date)." },
-                { status: 400 }
-            );
-        }
+    if (!name || !course || !date) {
+      return NextResponse.json(
+        { success: false, message: "Missing required student data (name, course, date)." },
+        { status: 400 }
+      );
+    }
 
-        const { renderToStaticMarkup } = await import("react-dom/server")
-        const Certificate = (await import("@/components/certificate")).default
+    const { renderToStaticMarkup } = await import("react-dom/server")
+    const Certificate = (await import("@/components/certificate")).default
 
-        // Render the React component to an HTML string
-        const certHtml = renderToStaticMarkup(
-            Certificate({ name, course, date })
-        )
+    // Render the React component to an HTML string
+    const certHtml = renderToStaticMarkup(
+      Certificate({ name, course, date, mode: "server" })
+    )
 
-        const fullHtml = `
+    const fullHtml = `
       <!DOCTYPE html>
       <html>
          <head>
@@ -51,46 +51,93 @@ export async function POST(request) {
       </html>
     `;
 
-        console.debug("\n launching brower using puppeteer...")
-        const browser = await puppeteer.launch({
-            headless: "new",
-            args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        });
+    console.debug("\n launching brower using puppeteer...")
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
 
-        console.debug("\n launched brower successfully using puppeteer...")
+    console.debug("\n launched brower successfully using puppeteer...")
 
-        const page = await browser.newPage();
-        await page.setViewport({
-            width: 1200,
-            height: 1600, // Increased height
-            deviceScaleFactor: 2
-        });
+    const page = await browser.newPage();
+    await page.setViewport({
+      width: 1200,
+      height: 1600, // Increased height
+      deviceScaleFactor: 2
+    });
 
-        await page.setContent(fullHtml, { waitUntil: "networkidle0" });
-        await new Promise(resolve => setTimeout(resolve, 1500));
+    await page.setContent(fullHtml, { waitUntil: "networkidle0" });
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const tempDir = os.tmpdir();
-        const tempPath = path.join(tempDir, `${name.replace(/ /g, "_")}_${Date.now()}.png`);
+    const tempDir = os.tmpdir();
+    const tempPath = path.join(tempDir, `${name.replace(/ /g, "_")}_${Date.now()}.png`);
 
-        await page.screenshot({ path: tempPath, type: 'png', fullPage: true });
-        console.log("Saved image at:", tempPath);
+    await page.evaluateHandle('document.fonts.ready');
+    const certificateElement = await page.$('#certificate-design');
 
-        console.debug("\n screenshot saved...")
-
-        await browser.close();
-        console.debug("\n browser closed...")
-
-        return NextResponse.json({
-            success: true,
-            message: "Certificate generated successfully.",
-            path: tempPath,
-        });
-
-    } catch (error) {
-        console.error("Error in /api/generate-certificate:", error);
-        return NextResponse.json(
-            { success: false, message: "An internal server error occurred while generating the certificate." },
-            { status: 500 }
-        );
+    if (!certificateElement) {
+      await browser.close();
+      return NextResponse.json(
+        { success: false, message: "Certificate element not found." },
+        { status: 500 }
+      );
     }
+
+    const clip = await certificateElement.boundingBox();
+
+
+    await certificateElement.screenshot({
+      path: tempPath,
+      type: 'png',
+      clip: {
+        x: clip.x,
+        y: clip.y,
+        width: clip.width,
+        height: clip.height,
+      },
+    });
+    console.log("Saved image at:", tempPath);
+
+    console.debug("\n screenshot saved...")
+
+    await browser.close();
+    console.debug("\n browser closed...")
+
+    // const storage = new Storage({
+    //   keyFilename: 'google-service-key.json', // relative to root
+    // });
+
+    // const bucketName = 'your-bucket-name'; // replace this
+    // const destination = `certificates/${name.replace(/ /g, '_')}.png`;
+
+
+    // await storage.bucket(bucketName).upload(tempPath, {
+    //   destination,
+    //   public: true,
+    //   metadata: {
+    //     cacheControl: 'public, max-age=31536000',
+    //   },
+    // });
+
+    // console.debug("\nUploaded successfully....")
+    // await fs.unlink(tempPath);
+
+    // const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+
+    // console.debug("\n Public url ==> ", publicUrl)
+    // return ({ success: true, message: "Upload sucessfully", publicUrl })
+
+    return NextResponse.json({
+      success: true,
+      message: "Certificate generated successfully.",
+      path: tempPath,
+    });
+
+  } catch (error) {
+    console.error("Error in /api/generate-certificate:", error);
+    return NextResponse.json(
+      { success: false, message: "An internal server error occurred while generating the certificate." },
+      { status: 500 }
+    );
+  }
 }
