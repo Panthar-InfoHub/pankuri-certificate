@@ -1,57 +1,66 @@
 export default function Certificate({ name = "Gagan", course = "Btech", date = "26*8/85", mode = "dev" }) {
-
   const ribbonImgUrl = "https://res.cloudinary.com/dq6ubifli/image/upload/v1753638293/ribbon_aqdxld.png"
 
   return (
     <div id="certificate-design" style={{
-      minHeight: '100vh',
+      width: '100%',
+      height: '100%',
       backgroundColor: 'white',
-      padding: '64px 32px', // lg:p-16 equivalent
+      margin: 0,
+      padding: 0,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      // Add print-specific sizing
+      '@media print': {
+        width: '297mm',
+        height: '210mm'
+      }
     }}>
       <div style={{
-        width: '100%',
-        maxWidth: '896px', // max-w-4xl
-        border: '1px solid #d1d5db', // border-gray-300
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', // shadow-lg
+        width: '95%', // Use more available width
+        height: '90%', // Control height
+        border: '1px solid #d1d5db',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* Top Section - Dark Blue */}
         <div style={{
           backgroundColor: '#040159',
           color: 'white',
           textAlign: 'center',
-          padding: '64px 32px', // py-16 px-8
+          padding: '32px 16px', // Reduced padding
           position: 'relative',
-          zIndex: 10
+          zIndex: 10,
+          flex: '0 0 auto'
         }}>
           <h2 style={{
-            fontSize: '30px', // md:text-3xl
+            fontSize: '24px', // Reduced size
             fontFamily: 'serif',
-            letterSpacing: '0.25em', // tracking-widest
-            marginBottom: '8px',
-            margin: '0 0 8px 0'
+            letterSpacing: '0.25em',
+            marginBottom: '4px',
+            margin: '0 0 4px 0'
           }}>
             ACADMA
           </h2>
           <h1 style={{
-            fontFamily: "'My Soul', cursive", // My_Soul font with fallback
-            fontSize: '128px', // lg:text-8xl
+            fontFamily: "'My Soul', cursive",
+            fontSize: '80px', // Reduced from 128px
             fontWeight: 'bold',
             fontStyle: 'italic',
-            lineHeight: '1', // leading-none
-            marginBottom: '16px',
-            margin: '0 0 16px 0'
+            lineHeight: '1',
+            marginBottom: '8px',
+            margin: '0 0 8px 0'
           }}>
             Certificate
           </h1>
           <p style={{
-            fontSize: '24px', // md:text-2xl
+            fontSize: '18px', // Reduced size
             fontFamily: 'serif',
-            letterSpacing: '0.25em', // tracking-widest
+            letterSpacing: '0.25em',
             margin: '0'
           }}>
             OF APPRECIATION
@@ -63,8 +72,8 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
           position: 'relative',
           display: 'flex',
           justifyContent: 'space-between',
-          height: '48px', // h-12
-          marginTop: '-4px' // -mt-1
+          height: '32px', // Reduced height
+          marginTop: '-2px'
         }}>
           <div style={{
             backgroundColor: '#c8b100',
@@ -84,41 +93,45 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
         <div style={{
           backgroundColor: 'white',
           textAlign: 'center',
-          padding: '64px 32px' // py-16 px-8
+          padding: '32px 16px', // Reduced padding
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
         }}>
           <p style={{
-            fontSize: '30px', // md:text-3xl
+            fontSize: '22px', // Reduced size
             fontFamily: 'serif',
-            marginBottom: '32px', // mb-8
-            margin: '0 0 32px 0'
+            marginBottom: '24px',
+            margin: '0 0 24px 0'
           }}>
             This certificate is proudly presented to
           </p>
           <div style={{
-            borderBottom: '1px solid #9ca3af', // border-gray-400
-            width: '75%', // w-3/4
-            margin: '0 auto 48px auto', // mx-auto mb-12
-            height: '32px', // h-8
+            borderBottom: '1px solid #9ca3af',
+            width: '75%',
+            margin: '0 auto 32px auto',
+            height: '28px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '28px',
+            fontSize: '24px', // Reduced size
             fontWeight: 'bold',
             color: '#040159'
           }}>
             {name}
           </div>
           <p style={{
-            fontSize: '30px', // md:text-3xl
+            fontSize: '22px', // Reduced size
             fontFamily: 'serif',
-            marginBottom: '16px', // mb-4
-            margin: '0 0 16px 0'
+            marginBottom: '12px',
+            margin: '0 0 12px 0'
           }}>
             For Successful Completion of The Course
           </p>
           <p style={{
             fontFamily: 'serif',
-            fontSize: '48px', // md:text-5xl
+            fontSize: '36px', // Reduced from 48px
             fontWeight: 'bold',
             margin: '0',
             color: '#040159'
@@ -127,16 +140,17 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
           </p>
         </div>
 
-        {/* Bottom Section - White with Date, Signature, and Seal */}
+        {/* Bottom Section */}
         <div style={{
           backgroundColor: 'white',
-          padding: '44px 32px 64px', // py-16 px-8
+          padding: '24px 16px', // Reduced padding
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-around',
-          gap: '32px', // gap-8
+          gap: '24px',
           flexDirection: 'row',
-          flexWrap: 'wrap'
+          flexWrap: 'nowrap', // Prevent wrapping
+          flex: '0 0 auto'
         }}>
           <div style={{
             display: 'flex',
@@ -144,20 +158,20 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
             alignItems: 'center'
           }}>
             <div style={{
-              borderBottom: '1px solid #9ca3af', // border-gray-400
-              width: '192px', // w-48
-              marginBottom: '8px', // mb-2
-              height: '32px', // h-8
+              borderBottom: '1px solid #9ca3af',
+              width: '160px', // Reduced width
+              marginBottom: '6px',
+              height: '85px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '18px',
+              fontSize: '16px',
               fontWeight: 'bold'
             }}>
               {date}
             </div>
             <p style={{
-              fontSize: '18px', // text-lg
+              fontSize: '16px',
               fontFamily: 'serif',
               margin: '0'
             }}>
@@ -165,14 +179,17 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
             </p>
           </div>
 
-          {/* Award ribbon seal - CSS recreation */}
           <div style={{
             position: 'relative',
           }}>
             <img
               src={mode === "server" ? ribbonImgUrl : "/ribbon.png"}
-              alt="Award_ribbon_seal"
-              style={{ width: "8rem", objectFit: "cover" }}
+              alt="Award ribbon seal"
+              style={{
+                width: "6rem", // Reduced size
+                height: "8rem",
+                objectFit: "cover"
+              }}
             />
           </div>
 
@@ -181,14 +198,25 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
             flexDirection: 'column',
             alignItems: 'center'
           }}>
+
             <div style={{
-              borderBottom: '1px solid #9ca3af', // border-gray-400
-              width: '192px', // w-48
-              marginBottom: '8px', // mb-2
-              height: '32px' // h-8
-            }}></div>
+              borderBottom: '1px solid #9ca3af',
+              width: '160px', // Reduced width
+              marginBottom: '6px',
+              height: '85px'
+            }}>
+              <img
+                src={"https://res.cloudinary.com/dq6ubifli/image/upload/v1753808839/sign_o2v6wk.png"}
+                alt="Signature"
+                style={{
+                  width: "100%", // Reduced size
+                  height: "100%",
+                  objectFit: "cover"
+                }}
+              />
+            </div>
             <p style={{
-              fontSize: '18px', // text-lg
+              fontSize: '16px',
               fontFamily: 'serif',
               margin: '0'
             }}>
@@ -200,5 +228,3 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
     </div>
   )
 }
-
-

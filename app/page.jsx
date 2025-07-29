@@ -9,7 +9,7 @@ export default function HomePage() {
       <div className="space-y-6">
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight flex gap-6 items-center">
           <span className=" ">
-            Academia
+            Acadma
           </span>
           <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
             Certification

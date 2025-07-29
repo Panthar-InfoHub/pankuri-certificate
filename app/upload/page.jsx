@@ -50,13 +50,13 @@ export default function UploadPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 md:p-12 lg:p-24 space-y-8 bg-gradient-to-br from-gray-50 to-gray-100">
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center">Upload Your CSV File</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center">Upload Your <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">CSV</span>  File</h1>
       <p className="text-md text-gray-600 text-center max-w-prose">
         Select a CSV file from your device to view its contents and proceed.
       </p>
       <div className="grid w-full max-w-sm items-center gap-2">
         <Label htmlFor="csv-file" className="text-lg font-medium text-gray-700">
-          Choose CSV File
+          Choose CSV  File
         </Label>
         <Input
           id="csv-file"
@@ -69,7 +69,7 @@ export default function UploadPage() {
       <Button
         onClick={handleUpload}
         disabled={!file || isUploading}
-        className="w-full max-w-xs py-6 text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 ease-in-out"
+        className="w-full max-w-xs py-6 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 ease-in-out cursor-pointer"
       >
         {isUploading ? "Uploading..." : "Upload and View"}
       </Button>
