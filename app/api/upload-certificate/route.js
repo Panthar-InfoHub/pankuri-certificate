@@ -4,13 +4,16 @@ import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 import path from "path";
 import os from "os";
+import * as fs from 'fs/promises'
+import { Storage } from "@google-cloud/storage";
+import { registerUser, sendMessage } from "@/lib/helper";
 
 export async function POST(request) {
   try {
     const { student } = await request.json();
 
     console.debug("Student data ===> ", student)
-    const { Name: name, course, date } = student;
+    const { Name: name, course, date, phone, email } = student;
 
     if (!name || !course || !date) {
       return NextResponse.json(
@@ -62,7 +65,7 @@ export async function POST(request) {
     const page = await browser.newPage();
     await page.setViewport({
       width: 1200,
-      height: 1600, // Increased height
+      height: 1600,
       deviceScaleFactor: 2
     });
 
@@ -70,7 +73,7 @@ export async function POST(request) {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     const tempDir = os.tmpdir();
-    const tempPath = path.join(tempDir, `${name.replace(/ /g, "_")}_${Date.now()}.png`);
+    const tempPath = path.join(tempDir, `${name.replace(/ /g, "_")}_${Date.now()}.pdf`);
 
     await page.evaluateHandle('document.fonts.ready');
     const certificateElement = await page.$('#certificate-design');
@@ -83,54 +86,78 @@ export async function POST(request) {
       );
     }
 
-    const clip = await certificateElement.boundingBox();
 
-
-    await certificateElement.screenshot({
+    await page.pdf({
       path: tempPath,
-      type: 'png',
-      clip: {
-        x: clip.x,
-        y: clip.y,
-        width: clip.width,
-        height: clip.height,
-      },
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      preferCSSPageSize: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      displayHeaderFooter: false,
+      scale: 0.65,        // Reduce scale significantly
+      pageRanges: '1',    // Force single page
+      width: '11.7in',    // Explicit landscape width
+      height: '8.3in'
     });
-    console.log("Saved image at:", tempPath);
 
-    console.debug("\n screenshot saved...")
+    console.log("Saved certificate pdf at:", tempPath);
+
+    console.debug("\n PDF saved...")
 
     await browser.close();
     console.debug("\n browser closed...")
 
-    // const storage = new Storage({
-    //   keyFilename: 'google-service-key.json', // relative to root
-    // });
+    const storage = new Storage({
+      keyFilename: 'google-service-key.json',
+    });
 
-    // const bucketName = 'your-bucket-name'; // replace this
-    // const destination = `certificates/${name.replace(/ /g, '_')}.png`;
+    const bucketName = 'certificate-bucket-001';
+    const destination = `certificates/${name.replace(/ /g, '_')}.pdf`;
 
 
-    // await storage.bucket(bucketName).upload(tempPath, {
-    //   destination,
-    //   public: true,
-    //   metadata: {
-    //     cacheControl: 'public, max-age=31536000',
-    //   },
-    // });
+    await storage.bucket(bucketName).upload(tempPath, {
+      destination,
+      metadata: {
+        cacheControl: 'public, max-age=31536000',
+        contentType: 'application/pdf',
+      },
+    });
 
-    // console.debug("\nUploaded successfully....")
-    // await fs.unlink(tempPath);
+    console.debug("\nUploaded on cloud successfully....")
+    await fs.unlink(tempPath);
 
-    // const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+    const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
 
-    // console.debug("\n Public url ==> ", publicUrl)
-    // return ({ success: true, message: "Upload sucessfully", publicUrl })
+    console.debug("\n Public url for ss through cloud ==> ", publicUrl)
+
+    const registerRes = await registerUser(name, phone, email)
+
+    console.debug("\n Register res ==> ", registerRes)
+
+    if (!registerRes) {
+      return NextResponse.json({
+        success: false,
+        message: "Failed to register user on Interakt",
+      }, { status: 500 });
+    }
+
+    const msgRes = await sendMessage({ phoneNo: phone, course, date, name, publicUrl })
+
+    if (!msgRes.success) {
+      return NextResponse.json({
+        success: false,
+        message: "Failed to send message on Interakt",
+        error: msgRes.error,
+      }, { status: 500 });
+    }
+
 
     return NextResponse.json({
       success: true,
-      message: "Certificate generated successfully.",
-      path: tempPath,
+      message: "Certificate Upload sucessfully.",
+      name: name,
+      publicUrl,
     });
 
   } catch (error) {
