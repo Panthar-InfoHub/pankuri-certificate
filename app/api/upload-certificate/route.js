@@ -1,7 +1,6 @@
 export const runtime = 'nodejs'
 
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer";
 import path from "path";
 import os from "os";
 import * as fs from 'fs/promises'
@@ -12,15 +11,20 @@ export async function POST(request) {
   try {
     const { student } = await request.json();
 
-    console.debug("Student data ===> ", student)
-    const { Name: name, course, date, phone, email } = student;
+    const { Name: name, course, date: studentDate, phone } = student;
+    console.debug("\n\nStudent data ===> ", student)
 
-    if (!name || !course || !date) {
+    const date = studentDate ? studentDate : new Date().toISOString().split("T")[0]
+
+
+    if (!name || !course) {
       return NextResponse.json(
-        { success: false, message: "Missing required student data (name, course, date)." },
+        { success: false, message: "Missing required student data (name, course)." },
         { status: 400 }
       );
     }
+
+    console.debug(`\n\n Creating certificate of student with data :  `, { name, course, date, phone })
 
     const { renderToStaticMarkup } = await import("react-dom/server")
     const Certificate = (await import("@/components/certificate")).default
@@ -31,43 +35,66 @@ export async function POST(request) {
     )
 
     const fullHtml = `
-      <!DOCTYPE html>
-      <html>
-         <head>
-          <meta charset="utf-8" />
-          <link rel="preconnect" href="https://fonts.googleapis.com">
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=My+Soul&display=swap" rel="stylesheet">
-          <style>
-            body { 
-              margin: 0; 
-              font-family: 'Georgia', serif;
-            }
-            * {
-              box-sizing: border-box;
-            }
-          </style>
-        </head>
-        <body>
-          ${certHtml}
-        </body>
-      </html>
-    `;
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=My+Soul&display=swap" rel="stylesheet">
+      <style>
+        @page { 
+          size: A4 landscape; 
+          margin: 0; 
+        }
+        * {
+          box-sizing: border-box;
+        }
+        html, body { 
+          margin: 0; 
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          font-family: 'Georgia', serif;
+          overflow: hidden;
+        }
+        #certificate-design {
+          width: 297mm !important;
+          height: 210mm !important;
+        }
+      </style>
+    </head>
+    <body>
+      ${certHtml}
+    </body>
+  </html>
+`;
+
 
     console.debug("\n launching brower using puppeteer...")
+
+    const chromium = (await import("@sparticuz/chromium")).default;
+    const puppeteer = (await import("puppeteer-core")).default;
+
+    console.debug("\n Puppeteer libraries imported successfully")
+
     const browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
     console.debug("\n launched brower successfully using puppeteer...")
 
     const page = await browser.newPage();
     await page.setViewport({
-      width: 1200,
-      height: 1600,
-      deviceScaleFactor: 2
+      width: 1754,
+      height: 1240,
+      deviceScaleFactor: 1
     });
+
 
     await page.setContent(fullHtml, { waitUntil: "networkidle0" });
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -86,6 +113,8 @@ export async function POST(request) {
       );
     }
 
+    await page.emulateMediaType('screen');
+
 
     await page.pdf({
       path: tempPath,
@@ -95,10 +124,7 @@ export async function POST(request) {
       preferCSSPageSize: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
       displayHeaderFooter: false,
-      scale: 0.65,        // Reduce scale significantly
       pageRanges: '1',    // Force single page
-      width: '11.7in',    // Explicit landscape width
-      height: '8.3in'
     });
 
     console.log("Saved certificate pdf at:", tempPath);
@@ -119,6 +145,7 @@ export async function POST(request) {
     const bucketName = 'certificate-bucket-001';
     const destination = `certificates/${name.replace(/ /g, '_')}.pdf`;
 
+    //Setting Cloud Storage
 
     await storage.bucket(bucketName).upload(tempPath, {
       destination,
@@ -132,20 +159,18 @@ export async function POST(request) {
     await fs.unlink(tempPath);
 
     const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
-
     console.debug("\n Public url for ss through cloud ==> ", publicUrl)
 
-    const registerRes = await registerUser(name, phone, email)
+    //Register Student to interart
+    const registerRes = await registerUser(name, phone)
 
     console.debug("\n Register res ==> ", registerRes)
 
-    if (!registerRes) {
-      return NextResponse.json({
-        success: false,
-        message: "Failed to register user on Interakt",
-      }, { status: 500 });
+    if (!registerRes.success) {
+      console.warn(registerRes.message)
     }
 
+    // Send Whatsapp Message
     const msgRes = await sendMessage({ phoneNo: phone, course, date, name, publicUrl })
 
     if (!msgRes.success) {
@@ -155,7 +180,6 @@ export async function POST(request) {
         error: msgRes.error,
       }, { status: 500 });
     }
-
 
     return NextResponse.json({
       success: true,

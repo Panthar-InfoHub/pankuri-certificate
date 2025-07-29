@@ -27,7 +27,6 @@ export default function Mannual() {
             console.log(" Form course =>  ", formData.get("course"))
             console.log(" Form date =>  ", formData.get("date"))
             console.log(" Form phone =>  ", formData.get("phone"))
-            console.log(" Form email =>  ", formData.get("email"))
 
 
             const item = {
@@ -35,7 +34,6 @@ export default function Mannual() {
                 course: formData.get("course"),
                 date: formData.get("date"),
                 phone: formData.get("phone"),
-                email: formData.get("email"),
             }
 
             const response = await fetch('/api/upload-certificate', {
@@ -50,6 +48,8 @@ export default function Mannual() {
             console.log("certificate response ==> ", res)
             if (res.success) {
                 toast.success(`Certificate of student name : ${item.Name} send successfully`)
+            } else {
+                toast.error(res.message)
             }
         } catch (error) {
             toast.error("Error while sending certificate : ", error.message)
@@ -125,19 +125,6 @@ export default function Mannual() {
                                     required
                                     placeholder="Enter phone number"
                                     className="bg-gray-50 border-gray-300 text-gray-900 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="Email" className="text-gray-700 font-medium">
-                                    Email
-                                </Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    required
-                                    className="bg-gray-50 border-gray-300 text-gray-900 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
-                                    placeholder="Enter email"
                                 />
                             </div>
                         </div>

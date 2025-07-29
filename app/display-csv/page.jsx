@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FileSpreadsheet, Loader2 } from "lucide-react"
+import { FileSpreadsheet, Home, Loader2, SendHorizonal } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -92,12 +92,23 @@ export default function DisplayCsvPage() {
       {/* Subtle background gradients for light mode */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 via-transparent to-orange-100/50 opacity-70" />
 
-      <div className="relative flex min-h-screen flex-col items-center p-4 sm:p-8 md:p-12 lg:p-24">
-        <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-center text-gray-900">Uploaded CSV Content</h1>
+      <div className="relative flex min-h-screen flex-col gap-8 items-center p-4 sm:p-8 md:p-12 lg:p-24">
+        <div className="flex items-center gap-5" >
+          <Link href={"/"}  >
+            <Home className="size-8 text-purple-500" />
+          </Link>
+          <h1 className="text-4xl sm:text-5xl font-bold text-center text-gray-900 flex items-center gap-4">Uploaded
+            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+              CSV
+            </span>
+            Content
+          </h1>
+        </div>
+
 
         {csvData.length > 0 ? (
-          <Card className="w-full max-w-6xl bg-white border-gray-200 shadow-xl">
-            <CardHeader className="bg-gray-50 border-b border-gray-200">
+          <Card className="w-full max-w-6xl bg-white border-gray-200 shadow-xl !pt-0">
+            <CardHeader className="bg-gray-50 border-b border-gray-200 pt-4">
               <CardTitle className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
                 <FileSpreadsheet className="h-6 w-6 text-[#8A2BE2]" />
                 CSV Data Preview
@@ -139,7 +150,7 @@ export default function DisplayCsvPage() {
               <Button
                 onClick={handleClick}
                 disabled={uploadLoading}
-                className="mt-4 py-6 px-8 text-lg font-semibold bg-gradient-to-r from-[#8A2BE2] to-[#FF69B4] hover:from-[#943be7] hover:to-[#ff79bf] shadow-lg shadow-[#8A2BE2]/30 text-white"
+                className="mt-4 py-6 px-8 text-lg font-semibold bg-gradient-to-r from-[#8A2BE2] to-[#FF69B4] hover:from-[#943be7] hover:to-[#ff79bf] shadow-lg shadow-[#8A2BE2]/30 text-white cursor-pointer hover:scale-[0.9] duration-300 ease-in-out"
               >
                 {uploadLoading ? (
                   <>
@@ -147,7 +158,10 @@ export default function DisplayCsvPage() {
                     Generating Certificates...
                   </>
                 ) : (
-                  "Generate Certificates"
+                  <>
+                    Generate Certificates
+                    < SendHorizonal />
+                  </>
                 )}
               </Button>
             </CardFooter>
