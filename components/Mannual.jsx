@@ -26,12 +26,16 @@ export default function Mannual() {
             console.log(" Form name =>  ", formData.get("name"))
             console.log(" Form course =>  ", formData.get("course"))
             console.log(" Form date =>  ", formData.get("date"))
+            console.log(" Form phone =>  ", formData.get("phone"))
+            console.log(" Form email =>  ", formData.get("email"))
 
 
             const item = {
                 Name: formData.get("name"),
                 course: formData.get("course"),
                 date: formData.get("date"),
+                phone: formData.get("phone"),
+                email: formData.get("email"),
             }
 
             const response = await fetch('/api/upload-certificate', {
@@ -108,6 +112,32 @@ export default function Mannual() {
                                     type="date"
                                     required
                                     className="bg-gray-50 border-gray-300 text-gray-900 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="date" className="text-gray-700 font-medium">
+                                    Phone Number
+                                </Label>
+                                <Input
+                                    id="phone"
+                                    name="phone"
+                                    type="text"
+                                    required
+                                    placeholder="Enter phone number"
+                                    className="bg-gray-50 border-gray-300 text-gray-900 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="Email" className="text-gray-700 font-medium">
+                                    Email
+                                </Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    required
+                                    className="bg-gray-50 border-gray-300 text-gray-900 focus:border-[#8A2BE2] focus:ring-[#8A2BE2]/20"
+                                    placeholder="Enter email"
                                 />
                             </div>
                         </div>
