@@ -49,7 +49,7 @@ export default function Mannual() {
             if (res.success) {
                 toast.success(`Certificate of student name : ${item.Name} send successfully`)
             } else {
-                toast.error(res.message)
+                toast.error(`Error while sending certificate: ${error.message}`)
             }
         } catch (error) {
             toast.error("Error while sending certificate : ", error.message)

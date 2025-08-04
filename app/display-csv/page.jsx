@@ -76,12 +76,14 @@ export default function DisplayCsvPage() {
         console.log("certificate response ==> ", res)
         if (res.success) {
           toast.success(`Certificate of student name : ${item.name} send successfully`)
+        } else {
+          toast.error(res.message)
         }
       }
       localStorage.removeItem("uploadedCsvContent")
       setCsvData([])
     } catch (error) {
-      toast.error("Error while sending certificate : ", error.message)
+      toast.error(`Error while sending certificate: ${error.message}`)
     } finally {
       setUploadLoading(false)
     }

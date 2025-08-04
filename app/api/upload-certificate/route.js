@@ -176,14 +176,14 @@ export async function POST(request) {
     if (!msgRes.success) {
       return NextResponse.json({
         success: false,
-        message: "Failed to send message on Interakt",
+        message: msgRes.message,
         error: msgRes.error,
       }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
-      message: "Certificate Upload sucessfully.",
+      message: msgRes.message,
       name: name,
       publicUrl,
     });
