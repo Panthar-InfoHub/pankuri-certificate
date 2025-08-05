@@ -47,7 +47,7 @@ export default function Certificate({ name = "Gagan", course = "Btech", date = "
             ACADMA
           </h2>
           <h1 style={{
-            fontFamily: "'My Soul', cursive",
+            fontFamily: "'Merriweather', serif",
             fontSize: '80px', // Reduced from 128px
             fontWeight: 'bold',
             fontStyle: 'italic',
