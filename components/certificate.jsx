@@ -1,4 +1,4 @@
-export default function Certificate({ name = "Gagan", course = "Btech", date = "26*8/85", mode = "dev" }) {
+export default function Certificate({ name = "Gagan", course = "Btech", date = "", mode = "dev" }) {
   const ribbonImgUrl = "https://res.cloudinary.com/dq6ubifli/image/upload/v1753638293/ribbon_aqdxld.png"
 
   return (

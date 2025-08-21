@@ -143,14 +143,15 @@ export async function POST(request) {
     });
 
     const bucketName = 'certificate-bucket-001';
-    const destination = `certificates/${name.replace(/ /g, '_')}.pdf`;
+    const timestamp = Date.now();
+    const destination = `certificates/${name.replace(/ /g, '_')}_${timestamp}.pdf`;
 
     //Setting Cloud Storage
 
     await storage.bucket(bucketName).upload(tempPath, {
       destination,
       metadata: {
-        cacheControl: 'public, max-age=31536000',
+        cacheControl: 'no-cache, no-store, must-revalidate',
         contentType: 'application/pdf',
       },
     });
@@ -158,7 +159,7 @@ export async function POST(request) {
     console.debug("\nUploaded on cloud successfully....")
     await fs.unlink(tempPath);
 
-    const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+    const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}?v=${timestamp}`;
     console.debug("\n Public url for ss through cloud ==> ", publicUrl)
 
     //Register Student to interart

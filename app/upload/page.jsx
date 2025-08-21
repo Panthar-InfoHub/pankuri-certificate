@@ -33,11 +33,31 @@ export default function UploadPage() {
 
     reader.onload = (e) => {
       const csvContent = e.target.result
-      // Store the CSV content in localStorage to pass it to the next page
-      localStorage.setItem("uploadedCsvContent", csvContent)
-      toast.success("CSV file uploaded successfully!")
+      const lines = csvContent.split("\n").filter((line) => line.trim() !== "")
+      if (lines.length > 0) {
+        const headers = lines[0].split(",").map((h) => h.trim())
+
+        const parsedData = lines.slice(1).map((line, index) => {
+          const values = line.split(",").map((v) => v.trim())
+          const rowData = headers.reduce((obj, header, i) => {
+            obj[header] = values[i] || ""
+            return obj
+          }, {})
+          return {
+            ...rowData,
+            certificateStatus: "pending", 
+            id: index,
+          }
+        })
+
+        // Save processed JSON instead of raw CSV
+        localStorage.setItem("uploadedCsvData", JSON.stringify({ headers, rows: parsedData }))
+        toast.success("CSV file uploaded successfully!")
+        router.push("/display-csv")
+      } else {
+        toast.error("The uploaded CSV file is empty.")
+      }
       setIsUploading(false)
-      router.push("/display-csv") // Redirect to the display page
     }
 
     reader.onerror = () => {

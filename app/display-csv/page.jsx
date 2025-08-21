@@ -1,11 +1,11 @@
-"use client" // This component needs client-side interactivity
+"use client"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FileSpreadsheet, Home, Loader2, SendHorizonal } from "lucide-react"
+import { CheckCircle, FileSpreadsheet, Home, Loader2, SendHorizonal, Trash2, XCircle } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
@@ -13,42 +13,28 @@ export default function DisplayCsvPage() {
   const [csvData, setCsvData] = useState([])
   const [headers, setHeaders] = useState([])
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
   const [uploadLoading, setUploadLoading] = useState(false)
 
 
   useEffect(() => {
-    const content = localStorage.getItem("uploadedCsvContent")
-    if (content) {
-      try {
-        const lines = content.split("\n").filter((line) => line.trim() !== "")
-        if (lines.length > 0) {
-          // Simple CSV parsing: assumes comma-separated values and first line as headers
-          const parsedHeaders = lines[0].split(",").map((h) => h.trim())
-          setHeaders(parsedHeaders)
-
-          const parsedData = lines.slice(1).map((line) => {
-            const values = line.split(",").map((v) => v.trim())
-            // Map values to header keys
-            return parsedHeaders.reduce((obj, header, index) => {
-              obj[header] = values[index] || "" // Assign empty string if value is missing
-              return obj
-            }, {})
-          })
-          setCsvData(parsedData)
-          toast.success("CSV data loaded successfully!")
-        } else {
-          toast.error("The uploaded CSV file is empty.")
-        }
-      } catch (error) {
-        console.error("Error parsing CSV:", error)
-        toast.error("Failed to parse CSV content. Please check the file format.")
-      }
+    const stored = localStorage.getItem("uploadedCsvData")
+    if (stored) {
+      const { headers, rows } = JSON.parse(stored)
+      setHeaders(headers)
+      setCsvData(rows)
+      toast.success("CSV data loaded successfully!")
     } else {
       toast.error("No CSV data found. Please upload a file first.")
     }
     setLoading(false)
   }, [])
+
+
+  useEffect(() => {
+    if (csvData.length > 0) {
+      localStorage.setItem("uploadedCsvData", JSON.stringify({ headers, rows: csvData }))
+    }
+  }, [csvData, headers])
 
   if (loading) {
     return (
@@ -74,20 +60,56 @@ export default function DisplayCsvPage() {
 
         const res = await response.json()
         console.log("certificate response ==> ", res)
+
+        setCsvData(prev =>
+          prev.map(row =>
+            row.id === item.id
+              ? { ...row, certificateStatus: res.success ? "success" : "failed" }
+              : row
+          )
+        )
+
         if (res.success) {
-          toast.success(`Certificate of student name : ${item.name} send successfully`)
+          toast.success(`Certificate of student name : ${item.Name} send successfully`)
         } else {
           toast.error(res.message)
         }
       }
-      localStorage.removeItem("uploadedCsvContent")
-      setCsvData([])
+      // localStorage.removeItem("uploadedCsvContent")
+      // setCsvData([])
     } catch (error) {
       toast.error(`Error while sending certificate: ${error.message}`)
     } finally {
       setUploadLoading(false)
     }
   }
+
+  const renderCertificateStatus = (status) => {
+    switch (status) {
+      case "success":
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100 animate-pulse">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Yes
+          </Badge>
+        )
+      case "failed":
+        return (
+          <Badge variant="destructive" className="bg-red-100 text-red-800 hover:bg-red-100 animate-pulse">
+            <XCircle className="w-3 h-3 mr-1" />
+            No
+          </Badge>
+        )
+      default:
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-600 hover:bg-gray-100">
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            Pending
+          </Badge>
+        )
+    }
+  }
+
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900 relative overflow-hidden">
@@ -129,6 +151,9 @@ export default function DisplayCsvPage() {
                           {header}
                         </TableHead>
                       ))}
+                      <TableHead className="min-w-[140px] text-gray-700 font-bold text-left px-4 py-3">
+                        Certificate Send
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -142,13 +167,15 @@ export default function DisplayCsvPage() {
                             {row[header]}
                           </TableCell>
                         ))}
+                        <TableCell className="px-4 py-3">{renderCertificateStatus(row.certificateStatus)}</TableCell>
+
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
             </CardContent>
-            <CardFooter className="bg-gray-50 border-t border-gray-200">
+            <CardFooter className="bg-gray-50 border-t border-gray-200 flex justify-between items-center">
               <Button
                 onClick={handleClick}
                 disabled={uploadLoading}
@@ -166,6 +193,16 @@ export default function DisplayCsvPage() {
                   </>
                 )}
               </Button>
+              <Button
+                onClick={() => {
+                  localStorage.removeItem("uploadedCsvData")
+                  setCsvData([])
+                }}
+                className="mt-4 py-6 px-8 text-lg font-semibold bg-gray-600 hover:to-[#ff79bf] shadow-lg shadow-[#8A2BE2]/30 text-white cursor-pointer hover:scale-[0.9] duration-300 ease-in-out"
+              >
+                Delete Old Data
+                <Trash2 />
+              </Button>
             </CardFooter>
           </Card>
         ) : (
@@ -182,6 +219,6 @@ export default function DisplayCsvPage() {
           </div>
         )}
       </div>
-    </main>
+    </main >
   )
 }
