@@ -1,3 +1,4 @@
+import { EmptyDemo } from '@/components/emptyComp'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import UploadVideoDialog from '@/components/upload-video-dialog'
@@ -42,7 +43,8 @@ const page = () => {
 
     return (
         <main className="min-h-screen p-4 sm:p-6 md:p-8 mt-24 ">
-            <div className="container mx-auto max-w-7xl space-y-6">
+            <EmptyDemo />
+            {/* <div className="container mx-auto max-w-7xl space-y-6">
 
                 <div className="flex justify-between items-center mb-6">
                     <div>
@@ -72,7 +74,7 @@ const page = () => {
                         />
                     </CardContent>
                 </Card>
-            </div>
+            </div> */}
         </main>
     )
 }
