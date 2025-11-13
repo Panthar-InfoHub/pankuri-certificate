@@ -87,16 +87,20 @@ export async function POST(request) {
     } else {
       // Linux (Cloud Run) - use puppeteer-core with sparticuz chromium
       console.debug("Running on Linux - using Sparticuz Chromium")
-      const chromium = (await import('@sparticuz/chromium')).default;
+      const chromium = (await import('@sparticuz/chromium-min')).default;
       puppeteer = (await import('puppeteer-core')).default;
+
 
       browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
+        executablePath: await chromium.executablePath(
+          'https://github.com/Sparticuz/chromium/releases/download/v140.0.0/chromium-v140.0.0-pack.tar'
+        ),
         headless: chromium.headless,
         ignoreHTTPSErrors: true,
       });
+
     }
 
     console.debug("\n Browser launched successfully")
