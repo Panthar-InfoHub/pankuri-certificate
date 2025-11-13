@@ -4,18 +4,17 @@ import { NextResponse } from "next/server";
 import path from "path";
 import os from "os";
 import * as fs from 'fs/promises'
-import { Storage } from "@google-cloud/storage";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3Client } from "@/lib/clientS3";
 import { registerUser, sendMessage } from "@/lib/helper";
 
 export async function POST(request) {
   try {
     const { student } = await request.json();
-
     const { Name: name, course, date: studentDate, phone } = student;
+
     console.debug("\n\nStudent data ===> ", student)
-
     const date = studentDate ? studentDate : new Date().toISOString().split("T")[0]
-
 
     if (!name || !course) {
       return NextResponse.json(
@@ -29,7 +28,6 @@ export async function POST(request) {
     const { renderToStaticMarkup } = await import("react-dom/server")
     const Certificate = (await import("@/components/certificate")).default
 
-    // Render the React component to an HTML string
     const certHtml = renderToStaticMarkup(
       Certificate({ name, course, date, mode: "server" })
     )
@@ -39,9 +37,9 @@ export async function POST(request) {
   <html>
     <head>
       <meta charset="utf-8" />
-     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap" rel="stylesheet">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap" rel="stylesheet">
       <style>
         @page { 
           size: A4 landscape; 
@@ -70,23 +68,38 @@ export async function POST(request) {
   </html>
 `;
 
+    console.debug("\n Launching browser using puppeteer...")
 
-    console.debug("\n launching brower using puppeteer...")
+    let puppeteer;
+    let browser;
 
-    const chromium = (await import("@sparticuz/chromium")).default;
-    const puppeteer = (await import("puppeteer-core")).default;
+    if (process.platform === 'darwin') {
+      // macOS local dev - use regular puppeteer with its bundled Chrome
+      console.debug("Running on macOS - using bundled Puppeteer")
+      puppeteer = (await import('puppeteer')).default;
 
-    console.debug("\n Puppeteer libraries imported successfully")
+      browser = await puppeteer.launch({
+        headless: true,
+        // Don't use chromium args/executablePath on Mac!
+        // Puppeteer will use its own bundled Chrome
+      });
 
-    const browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
-    });
+    } else {
+      // Linux (Cloud Run) - use puppeteer-core with sparticuz chromium
+      console.debug("Running on Linux - using Sparticuz Chromium")
+      const chromium = (await import('@sparticuz/chromium')).default;
+      puppeteer = (await import('puppeteer-core')).default;
 
-    console.debug("\n launched brower successfully using puppeteer...")
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
+      });
+    }
+
+    console.debug("\n Browser launched successfully")
 
     const page = await browser.newPage();
     await page.setViewport({
@@ -94,7 +107,6 @@ export async function POST(request) {
       height: 1240,
       deviceScaleFactor: 1
     });
-
 
     await page.setContent(fullHtml, { waitUntil: "networkidle0" });
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -115,7 +127,6 @@ export async function POST(request) {
 
     await page.emulateMediaType('screen');
 
-
     await page.pdf({
       path: tempPath,
       format: 'A4',
@@ -124,54 +135,44 @@ export async function POST(request) {
       preferCSSPageSize: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
       displayHeaderFooter: false,
-      pageRanges: '1',    // Force single page
+      pageRanges: '1',
     });
 
     console.log("Saved certificate pdf at:", tempPath);
-
-    console.debug("\n PDF saved...")
-
     await browser.close();
-    console.debug("\n browser closed...")
+    console.debug("\n Browser closed")
 
-    const storage = new Storage({
-      projectId: process.env.GCP_PROJECT_ID,
-      credentials: {
-        client_email: process.env.GCP_CLIENT_EMAIL,
-        private_key: process.env.GCP_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      }
-    });
-
-    const bucketName = 'certificate-bucket-001';
+    // Upload to DigitalOcean Spaces
+    const fileBuffer = await fs.readFile(tempPath);
+    const bucketName = 'pankhuri-v3';
     const timestamp = Date.now();
     const destination = `certificates/${name.replace(/ /g, '_')}_${timestamp}.pdf`;
 
-    //Setting Cloud Storage
-
-    await storage.bucket(bucketName).upload(tempPath, {
-      destination,
-      metadata: {
-        cacheControl: 'no-cache, no-store, must-revalidate',
-        contentType: 'application/pdf',
-      },
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: destination,
+      Body: fileBuffer,
+      ContentType: 'application/pdf',
+      ACL: 'public-read',
     });
 
-    console.debug("\nUploaded on cloud successfully....")
+    await s3Client.send(command);
+    console.debug("\nUploaded certificate to DigitalOcean Spaces successfully.");
+
     await fs.unlink(tempPath);
 
-    const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}?v=${timestamp}`;
-    console.debug("\n Public url for ss through cloud ==> ", publicUrl)
+    const publicUrl = `https://pankhuri-v3.blr1.cdn.digitaloceanspaces.com/${destination}`;
+    console.debug("\n Public URL ==> ", publicUrl)
 
-    //Register Student to interart
+    // Register Student
     const registerRes = await registerUser(name, phone)
-
     console.debug("\n Register res ==> ", registerRes)
 
     if (!registerRes.success) {
       console.warn(registerRes.message)
     }
 
-    // Send Whatsapp Message
+    // Send WhatsApp Message
     const msgRes = await sendMessage({ phoneNo: phone, course, date, name, publicUrl })
 
     if (!msgRes.success) {
