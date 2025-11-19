@@ -3,6 +3,8 @@ import "./globals.css"
 import { Toaster } from "react-hot-toast" // Import Toaster for notifications
 import { Toaster as Sonner } from "@/components/ui/sonner"
 import Component from "@/components/Navbar"
+import { SessionProvider } from "next-auth/react"
+
 
 
 const inter = Inter({ subsets: ["latin"] })
@@ -16,10 +18,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Component />
-        {children}
-        <Toaster /> {/* Add Toaster component here */}
-        <Sonner position="top-center" richColors />
+        <SessionProvider>
+          <Component />
+          {children}
+          <Toaster /> {/* Add Toaster component here */}
+
+          <Sonner position="top-center" richColors />
+        </SessionProvider>
       </body>
     </html>
   )

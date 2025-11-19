@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 // Navigation links array
 const navigationLinks = [
@@ -36,6 +37,8 @@ const navigationLinks = [
 
 export default function Component() {
   const pathname = usePathname()
+  const { data: session } = useSession();
+
   return (
     <header className="fixed top-0 inset-x-0 border-b bg-gradient-to-r from-purple-50/50 via-pink-50/30 to-transparent backdrop-blur-sm px-4 md:px-6 shadow-lg shadow-purple-500/10">
       <div className="flex h-16 items-center justify-between gap-4">
@@ -111,7 +114,7 @@ export default function Component() {
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
                         <ul className="grid gap-2 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                          {link.children.map((component,i) => (
+                          {link.children.map((component, i) => (
                             <NavigationMenuLink key={`menu-${i}`} asChild>
                               <Link href={component.href}>
                                 <div className="text-sm leading-none font-medium">{component.label}</div>
@@ -146,7 +149,7 @@ export default function Component() {
         {/* Right side: Actions */}
         <div className="flex flex-1 items-center justify-end gap-4">
           {/* User menu */}
-          <UserMenu />
+          <UserMenu user={session?.user} />
         </div>
       </div>
     </header >
