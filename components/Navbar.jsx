@@ -40,7 +40,7 @@ export default function Component() {
   const { data: session } = useSession();
 
   return (
-    <header className="fixed top-0 inset-x-0 border-b bg-gradient-to-r from-purple-50/50 via-pink-50/30 to-transparent backdrop-blur-sm px-4 md:px-6 shadow-lg shadow-purple-500/10">
+    <header className="fixed z-50 top-0 inset-x-0 border-b bg-gradient-to-r from-purple-50/50 via-pink-50/30 to-transparent backdrop-blur-sm px-4 md:px-6 shadow-lg shadow-purple-500/10">
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex flex-1 items-center gap-2">

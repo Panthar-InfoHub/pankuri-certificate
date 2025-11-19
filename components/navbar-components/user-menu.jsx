@@ -1,4 +1,5 @@
 import {
+  LogInIcon,
   LogOutIcon,
   User
 } from "lucide-react";
@@ -17,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 
 export default function UserMenu({ user }) {
   return (
@@ -40,10 +41,15 @@ export default function UserMenu({ user }) {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer" >
-          <LogOutIcon size={16} className="opacity-60" aria-hidden="true" />
-          <span>Logout</span>
-        </DropdownMenuItem>
+        {user ?
+          <DropdownMenuItem onClick={() => signIn("google", { callbackUrl: "/" })} className="cursor-pointer" >
+            <LogInIcon size={16} className="opacity-60" aria-hidden="true" />
+            <span>Login</span>
+          </DropdownMenuItem>
+          : (<DropdownMenuItem onClick={() => signOut({ redirectTo: "/login" })} className="cursor-pointer" >
+            <LogOutIcon size={16} className="opacity-60" aria-hidden="true" />
+            <span>Logout</span>
+          </DropdownMenuItem>)}
       </DropdownMenuContent>
     </DropdownMenu>
   );
