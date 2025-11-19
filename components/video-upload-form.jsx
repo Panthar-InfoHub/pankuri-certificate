@@ -9,8 +9,9 @@ import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { completeMultipartUpload, createMultipartUpload, generatePresignedUrls } from "@/lib/action"
+import { completeMultipartUpload, createMultipartUpload, generatePresignedUrlForImage, generatePresignedUrls } from "@/lib/action"
 import axios from "axios"
+import { createVideo } from "@/lib/backend_actions/videos"
 
 const CHUNK_SIZE = 10 * 1024 * 1024 // 10 mb 
 
@@ -92,35 +93,42 @@ export function VideoUploadForm({ onSuccess }) {
                         )
                         console.log("\nUploaded Parts:", uploadedParts)
                         // 4. Complete the multipart upload
-                        toast.info("Finalizing upload...")
+                        toast.info("Finalizing video upload...")
                         await completeMultipartUpload(bucketName, key, uploadId, uploadedParts)
                     })()
 
                     allUploadTasks.push(videoUploadPromise);
 
                     if (value.thumbnail) {
-                        const thumbnailKey = `video-thumbnails/${Date.now()}_${value.thumbnail.name}`
-                        await axios.put(thumbnailKey, value.thumbnail, {
-                            onUploadProgress: (progressEvent) => {
-                                setThumbnailProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
-                            },
-                        })
+                        const thumbnailUploadPromise = (async () => {
+                            const thumbnailKey = `video-thumbnails/${Date.now()}_${value.thumbnail.name}`
+                            const { url } = await generatePresignedUrlForImage(bucketName, thumbnailKey, value.thumbnail.type)
+                            await axios.put(url, value.thumbnail, {
+                                onUploadProgress: (progressEvent) => {
+                                    setThumbnailProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
+                                },
+                            })
+                        })()
                         allUploadTasks.push(thumbnailUploadPromise)
                     }
+                    console.log("\nThumbnail upload task added....")
 
 
-                    setStatusMessage("Uploading files...")
+                    setStatusMessage("\nUploading files...")
                     await Promise.all(allUploadTasks)
 
-                    toast.success("Upload complete!")
+                    toast.success("\nUpload complete!")
                     setUploadStatus("success")
+
+                    console.log("\nUpdating backend with video details...")
+                    await createVideo();
 
                     // Reset after a delay
                     setTimeout(() => {
                         setPartProgress({})
                         setTotalParts(0)
                         setUploadStatus("idle")
-                        if (onSuccess) onSuccess() //ToDO : Have to add the data in backend later
+                        if (onSuccess) onSuccess()
                     }, 2000)
 
                 } catch (error) {
