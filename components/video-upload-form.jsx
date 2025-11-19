@@ -103,25 +103,29 @@ export function VideoUploadForm({ onSuccess }) {
                         const thumbnailUploadPromise = (async () => {
                             const thumbnailKey = `video-thumbnails/${Date.now()}_${value.thumbnail.name}`
                             const { url } = await generatePresignedUrlForImage(bucketName, thumbnailKey, value.thumbnail.type)
-                            await axios.put(url, value.thumbnail, {
-                                onUploadProgress: (progressEvent) => {
-                                    setThumbnailProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
-                                },
-                            })
+                            await axios.put(url, value.thumbnail,
+                                {
+                                    headers: {
+                                        'Content-Type': value.thumbnail.type,
+                                        'x-amz-acl': 'public-read'
+                                    },
+                                    onUploadProgress: (progressEvent) => {
+                                        setThumbnailProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
+                                    },
+                                })
                         })()
                         allUploadTasks.push(thumbnailUploadPromise)
                     }
                     console.log("\nThumbnail upload task added....")
 
 
-                    setStatusMessage("\nUploading files...")
                     await Promise.all(allUploadTasks)
 
                     toast.success("\nUpload complete!")
                     setUploadStatus("success")
 
                     console.log("\nUpdating backend with video details...")
-                    await createVideo();
+                    // await createVideo(); //Backend funciton running
 
                     // Reset after a delay
                     setTimeout(() => {
