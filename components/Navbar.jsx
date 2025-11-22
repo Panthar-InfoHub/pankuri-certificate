@@ -16,9 +16,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { usePathname } from "next/navigation"
+import { SessionProvider } from "next-auth/react"
 import Link from "next/link"
-import { useSession } from "next-auth/react"
+import { usePathname } from "next/navigation"
 
 // Navigation links array
 const navigationLinks = [
@@ -27,7 +27,7 @@ const navigationLinks = [
   {
     href: "/#", label: "Course Management", icon: BookCheck,
     children: [
-      { href: "/#", label: "Category", icon: BookCheck, description: "Manage categories" },
+      { href: "/category", label: "Category", icon: BookCheck, description: "Manage categories" },
       { href: "/#", label: "Course", icon: BookCheck, description: "Manage courses" },
       { href: "/#", label: "Module", icon: BookCheck, description: "Manage modules" },
       { href: "/#", label: "Content", icon: BookCheck, description: "Manage contents" },
@@ -37,7 +37,7 @@ const navigationLinks = [
 
 export default function Component() {
   const pathname = usePathname()
-  const { data: session } = useSession();
+  
 
   return (
     <header className="fixed z-50 top-0 inset-x-0 border-b bg-gradient-to-r from-purple-50/50 via-pink-50/30 to-transparent backdrop-blur-sm px-4 md:px-6 shadow-lg shadow-purple-500/10">
@@ -78,18 +78,59 @@ export default function Component() {
                     const Icon = link.icon
                     const isActive = pathname === link.href
                     return (
-                      <NavigationMenuItem key={index} className="w-full">
-                        <NavigationMenuLink
-                          href={link.href}
-                          className={`flex-row items-center gap-2 py-1.5 rounded-md px-3 transition-all duration-200 ${isActive
-                            ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/20"
-                            : "hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100"
-                            }`}
-                          active={isActive}>
-                          <Icon size={16} className={isActive ? "text-white" : "text-muted-foreground/80"} aria-hidden="true" />
-                          <span className={`font-medium ${isActive ? "text-white" : ""}`}>{link.label}</span>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
+                      link.children ?
+                        <NavigationMenuItem key={index} >
+                          <NavigationMenuTrigger className={`flex-row bg-transparent items-center gap-2 py-2 px-4 font-medium rounded-lg transition-all duration-200 ${isActive
+                            ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                            : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 "
+                            }`} >
+                            <Icon size={16} className={isActive ? "text-white" : "text-muted-foreground/80"} aria-hidden="true" />
+                            <span className={`font-medium ${isActive ? "text-white" : ""}`}>{link.label}</span>
+                          </NavigationMenuTrigger>
+                          <NavigationMenuContent>
+                            <ul className="grid gap-2 p-4 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                              {link.children.map((component, i) => {
+                                const ChildIcon = component.icon
+                                const isChildActive = pathname === component.href
+                                return (
+                                  <li key={`menu-${i}`}>
+                                    <NavigationMenuLink asChild>
+                                      <Link
+                                        href={component.href}
+                                        className={`block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors ${isChildActive
+                                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md"
+                                          : "hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                          }`}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <ChildIcon size={14} className={isChildActive ? "text-white" : "text-muted-foreground"} />
+                                          <div className={`text-sm font-medium leading-none ${isChildActive ? "text-white" : ""}`}>
+                                            {component.label}
+                                          </div>
+                                        </div>
+                                        <p className={`line-clamp-2 text-sm leading-snug ${isChildActive ? "text-white/90" : "text-muted-foreground"}`}>
+                                          {component.description}
+                                        </p>
+                                      </Link>
+                                    </NavigationMenuLink>
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                          </NavigationMenuContent>
+                        </NavigationMenuItem> :
+                        < NavigationMenuItem key={index} >
+                          <NavigationMenuLink
+                            active={isActive}
+                            href={link.href}
+                            className={`flex-row items-center gap-2 py-2 px-4 font-medium rounded-lg transition-all duration-200 ${isActive
+                              ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                              : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 "
+                              }`}>
+                            <Icon size={16} className={isActive ? "text-white" : "text-muted-foreground/80"} aria-hidden="true" />
+                            <span className={isActive ? "text-white" : ""}>{link.label}</span>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
                     );
                   })}
                 </NavigationMenuList>
@@ -114,16 +155,28 @@ export default function Component() {
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
                         <ul className="grid gap-2 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                          {link.children.map((component, i) => (
-                            <NavigationMenuLink key={`menu-${i}`} asChild>
-                              <Link href={component.href}>
-                                <div className="text-sm leading-none font-medium">{component.label}</div>
-                                <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
-                                  {component.description}
-                                </p>
-                              </Link>
-                            </NavigationMenuLink>
-                          ))}
+                          {link.children.map((component, i) => {
+                            const ChildIcon = component.icon
+                            const isChildActive = pathname === component.href
+                            return (
+                              <li key={`menu-${i}`}>
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    href={component.href}>
+                                    <div className="flex items-center gap-2">
+                                      <ChildIcon size={14} className={isChildActive ? "text-white" : "text-muted-foreground"} />
+                                      <div className={`text-sm font-medium leading-none ${isChildActive ? "text-white" : ""}`}>
+                                        {component.label}
+                                      </div>
+                                    </div>
+                                    <p className={`line-clamp-2 text-sm leading-snug ${isChildActive ? "text-white/90" : "text-muted-foreground"}`}>
+                                      {component.description}
+                                    </p>
+                                  </Link>
+                                </NavigationMenuLink>
+                              </li>
+                            )
+                          })}
                         </ul>
                       </NavigationMenuContent>
                     </NavigationMenuItem> :
@@ -149,7 +202,9 @@ export default function Component() {
         {/* Right side: Actions */}
         <div className="flex flex-1 items-center justify-end gap-4">
           {/* User menu */}
-          <UserMenu user={session?.user} />
+          <SessionProvider>
+            <UserMenu/>
+          </SessionProvider>
         </div>
       </div>
     </header >

@@ -12,6 +12,8 @@ import { toast } from "sonner"
 import { completeMultipartUpload, createMultipartUpload, generatePresignedUrlForImage, generatePresignedUrls } from "@/lib/action"
 import axios from "axios"
 import { createVideo } from "@/lib/backend_actions/videos"
+import { Field } from "./ui/field"
+import { useRouter } from "next/navigation"
 
 const CHUNK_SIZE = 10 * 1024 * 1024 // 10 mb 
 
@@ -21,12 +23,15 @@ export function VideoUploadForm({ onSuccess }) {
     const [partProgress, setPartProgress] = useState({})
     const [thumbnailProgress, setThumbnailProgress] = useState(0)
     const [totalParts, setTotalParts] = useState(0)
+    const router = useRouter();
     const [uploadStatus, setUploadStatus] = useState("idle")
 
     const form = useForm({
         defaultValues: {
             thumbnail: null,
+            title: null,
             videoQuality: "720",
+            isShort: false,
             video: null,
             duration: "",
         },
@@ -52,17 +57,17 @@ export function VideoUploadForm({ onSuccess }) {
                             throw new Error("Failed to create multipart upload.")
                         }
 
-                        console.log("Upload ID:", uploadId)
+                        // console.log("Upload ID:", uploadId)
 
                         // 2. Generate presigned URLs for each part
                         toast.info("Preparing upload parts...")
                         const calculatedTotalParts = Math.ceil(file.size / CHUNK_SIZE)
                         setTotalParts(calculatedTotalParts)
 
-                        console.log("\n partss ==> ", calculatedTotalParts)
+                        // console.log("\n partss ==> ", calculatedTotalParts)
                         const presignedUrlsData = await generatePresignedUrls(bucketName, key, uploadId, calculatedTotalParts)
 
-                        console.log("\nPresigned URLs:", presignedUrlsData)
+                        // console.log("\nPresigned URLs:", presignedUrlsData)
 
                         // Initialize progress for all parts
                         const initialProgress = {}
@@ -91,7 +96,7 @@ export function VideoUploadForm({ onSuccess }) {
                                 return { PartNumber: partData.partNumber, ETag: response.headers.etag.replace(/"/g, "") }
                             })
                         )
-                        console.log("\nUploaded Parts:", uploadedParts)
+                        // console.log("\nUploaded Parts:", uploadedParts)
                         // 4. Complete the multipart upload
                         toast.info("Finalizing video upload...")
                         await completeMultipartUpload(bucketName, key, uploadId, uploadedParts)
@@ -113,25 +118,41 @@ export function VideoUploadForm({ onSuccess }) {
                                         setThumbnailProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
                                     },
                                 })
+                            const publicThumbnailUrl = `https://${bucketName}.blr1.digitaloceanspaces.com/${thumbnailKey}`;
+
+                            return publicThumbnailUrl;
                         })()
                         allUploadTasks.push(thumbnailUploadPromise)
                     }
-                    console.log("\nThumbnail upload task added....")
+                    console.log("\nAll upload tasks added....")
 
 
-                    await Promise.all(allUploadTasks)
+                    const result = await Promise.all(allUploadTasks)
 
+                    console.log("\nAll upload tasks completed....", result)
                     toast.success("\nUpload complete!")
                     setUploadStatus("success")
 
                     console.log("\nUpdating backend with video details...")
-                    // await createVideo(); //Backend funciton running
+                    await createVideo({
+                        title: value.title,
+                        thumbnailUrl: result.length > 1 ? result[1] : "",
+                        storageKey: key,
+                        metadata: {
+                            quality: parseInt(value.videoQuality, 10) || 0,
+                            isShort: value.isShort,
+                        },
+                        duration: parseInt(value.duration, 10) || 0,
+                        status: "processing",
+                        quality: parseInt(value.videoQuality, 10) || 0,
+                    });
 
                     // Reset after a delay
                     setTimeout(() => {
                         setPartProgress({})
                         setTotalParts(0)
                         setUploadStatus("idle")
+                        router.refresh();
                         if (onSuccess) onSuccess()
                     }, 2000)
 
@@ -166,8 +187,26 @@ export function VideoUploadForm({ onSuccess }) {
                 e.stopPropagation()
                 form.handleSubmit()
             }}
-            className="space-y-6"
+            className="space-y-6 my-4 px-2"
         >
+            {/* Video title Field */}
+            <form.Field
+                name="title"
+                children={(field) => (
+                    <div className="space-y-2">
+                        <Label htmlFor="title">Title of Video</Label>
+                        <Input
+                            id="title"
+                            type="text"
+                            onChange={(e) => form.setFieldValue("title", e.target.value)}
+                            disabled={isPending}
+                            placeholder="Enter video title"
+                        />
+                        <p className="text-xs text-muted-foreground">Write the title of your video</p>
+                    </div>
+                )}
+            />
+
             {/* Thumbnail Upload Field */}
             <form.Field
                 name="thumbnail"
@@ -210,32 +249,58 @@ export function VideoUploadForm({ onSuccess }) {
             )}
 
             {/* Video Quality Select Field */}
-            <form.Field
-                name="videoQuality"
-                children={(field) => (
-                    <div className="space-y-2">
-                        <Label htmlFor="quality">Video Quality</Label>
-                        <Select
-                            value={field.state.value}
-                            onValueChange={(value) => form.setFieldValue("videoQuality", value)}
-                            disabled={isPending}
-                        >
-                            <SelectTrigger id="quality">
-                                <SelectValue placeholder="Select video quality" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="480">480p</SelectItem>
-                                <SelectItem value="720">720p (HD)</SelectItem>
-                                <SelectItem value="1080">1080p (Full HD)</SelectItem>
-                                <SelectItem value="1440">1440p (2K)</SelectItem>
-                                <SelectItem value="2160">2160p (4K)</SelectItem>
-                                <SelectItem value="4320">4320p (8K)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground">Choose the output quality for your uploaded video</p>
-                    </div>
-                )}
-            />
+            <Field orientation="horizontal">
+                <form.Field
+                    name="videoQuality"
+                    children={(field) => (
+                        <div className="space-y-2">
+                            <Label htmlFor="quality">Video Quality</Label>
+                            <Select
+                                value={field.state.value}
+                                onValueChange={(value) => form.setFieldValue("videoQuality", value)}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger id="quality">
+                                    <SelectValue placeholder="Select video quality" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="480">480p</SelectItem>
+                                    <SelectItem value="720">720p (HD)</SelectItem>
+                                    <SelectItem value="1080">1080p (Full HD)</SelectItem>
+                                    <SelectItem value="1440">1440p (2K)</SelectItem>
+                                    <SelectItem value="2160">2160p (4K)</SelectItem>
+                                    <SelectItem value="4320">4320p (8K)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Choose the output quality for your uploaded video</p>
+                        </div>
+                    )}
+                />
+
+                <form.Field
+                    name="isShort"
+                    children={(field) => (
+                        <div className="space-y-2">
+                            <Label htmlFor="isShort">Video Type</Label>
+                            <Select
+                                value={field.state.value ? "true" : "false"}
+                                onValueChange={(value) => form.setFieldValue("isShort", (value === "true"))}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger id="isShort">
+                                    <SelectValue placeholder="Select video type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="true">Short</SelectItem>
+                                    <SelectItem value="false">Long</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Choose the video type for your uploaded video</p>
+                        </div>
+                    )}
+                />
+
+            </Field>
 
             {/* Video Upload Field */}
             <form.Field

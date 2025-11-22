@@ -13,6 +13,8 @@ import { Play, Download, Trash2, MoreHorizontal, Edit } from "lucide-react"
 import Image from "next/image"
 import { DeleteVideoDialog } from "./delete-video-dialog"
 import { toast } from "sonner"
+import { useState } from "react"
+import { VideoPlayer } from "./VideoPlayer"
 
 export const videoColumns = [
     {
@@ -46,20 +48,21 @@ export const videoColumns = [
     {
         accessorKey: "quality",
         header: "Quality",
-        cell: ({ row }) => <Badge variant="secondary">{row.original.quality}</Badge>,
+        cell: ({ row }) => <Badge variant="secondary">{row.original.metadata.quality}</Badge>,
     },
     {
         accessorKey: "uploadedAt",
         header: "Uploaded",
         cell: ({ row }) => {
-            if (!row.original.uploadedAt) return "—"
-            return new Date(row.original.uploadedAt).toLocaleDateString()
+            if (!row.original.createdAt) return "—"
+            return new Date(row.original.createdAt).toLocaleDateString()
         },
     },
     {
         id: "actions",
         header: "Actions",
         cell: ({ row }) => {
+            const [showPlayer, setShowPlayer] = useState(false);
             const handleDownload = async () => {
 
                 console.log("Download:", row.original)
@@ -87,46 +90,49 @@ export const videoColumns = [
                 }
             }
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="w-4 h-4" />
-                            <span className="sr-only">Open menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem
-                            onClick={() => {
-                                console.log("Play:", row.original._id)
-                            }}
-                        >
-                            <Play className="w-4 h-4 mr-2" />
-                            Play
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => {
-                                console.log("Edit:", row.original._id)
-                            }}
-                        >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleDownload}>
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DeleteVideoDialog video={row.original}>
-                            <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}
-                                className="text-destructive focus:text-destructive"
-                            >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
+                <>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                                <span className="sr-only">Open menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => setShowPlayer(true)} >
+                                <Play className="w-4 h-4 mr-2" />
+                                Play
                             </DropdownMenuItem>
-                        </DeleteVideoDialog>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    console.log("Edit:", row.original.id)
+                                }}
+                            >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDownload}>
+                                <Download className="w-4 h-4 mr-2" />
+                                Download
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DeleteVideoDialog video={row.original}>
+                                <DropdownMenuItem
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="text-destructive focus:text-destructive"
+                                >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete
+                                </DropdownMenuItem>
+                            </DeleteVideoDialog>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <VideoPlayer
+                        isOpen={showPlayer}
+                        onClose={() => setShowPlayer(false)}
+                        video={row.original}
+                    />
+                </>
             )
         },
     },

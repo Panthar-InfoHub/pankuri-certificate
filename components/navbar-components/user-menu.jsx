@@ -18,9 +18,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
-export default function UserMenu({ user }) {
+export default function UserMenu() {
+  const { data: session } = useSession();
+  const user = session?.user
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +43,7 @@ export default function UserMenu({ user }) {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {user ?
+        {!user ?
           <DropdownMenuItem onClick={() => signIn("google", { callbackUrl: "/" })} className="cursor-pointer" >
             <LogInIcon size={16} className="opacity-60" aria-hidden="true" />
             <span>Login</span>

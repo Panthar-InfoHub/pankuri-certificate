@@ -18,13 +18,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionProvider>
-          <Component />
-          {children}
-          <Toaster /> {/* Add Toaster component here */}
+        <Component />
+        {children}
+        <Toaster /> {/* Add Toaster component here */}
 
-          <Sonner position="top-center" richColors />
-        </SessionProvider>
+        <Sonner position="top-center" richColors />
       </body>
     </html>
   )
