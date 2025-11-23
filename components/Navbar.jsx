@@ -28,16 +28,16 @@ const navigationLinks = [
     href: "/#", label: "Course Management", icon: BookCheck,
     children: [
       { href: "/category", label: "Category", icon: BookCheck, description: "Manage categories" },
-      { href: "/#", label: "Course", icon: BookCheck, description: "Manage courses" },
-      { href: "/#", label: "Module", icon: BookCheck, description: "Manage modules" },
-      { href: "/#", label: "Content", icon: BookCheck, description: "Manage contents" },
+      { href: "/course", label: "Course", icon: BookCheck, description: "Manage courses" },
+      { href: "/module", label: "Module", icon: BookCheck, description: "Manage modules" },
+      { href: "/lesson", label: "Lesson", icon: BookCheck, description: "Manage lessons" },
     ]
   },
 ]
 
 export default function Component() {
   const pathname = usePathname()
-  
+
 
   return (
     <header className="fixed z-50 top-0 inset-x-0 border-b bg-gradient-to-r from-purple-50/50 via-pink-50/30 to-transparent backdrop-blur-sm px-4 md:px-6 shadow-lg shadow-purple-500/10">
@@ -162,14 +162,18 @@ export default function Component() {
                               <li key={`menu-${i}`}>
                                 <NavigationMenuLink asChild>
                                   <Link
-                                    href={component.href}>
+                                    href={component.href}
+                                    className={`${isChildActive
+                                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                                      : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 "
+                                      }`} >
                                     <div className="flex items-center gap-2">
-                                      <ChildIcon size={14} className={isChildActive ? "text-white" : "text-muted-foreground"} />
+                                      <ChildIcon size={14} className={isChildActive ? "text-white" : "text-muted-foreground/80"} />
                                       <div className={`text-sm font-medium leading-none ${isChildActive ? "text-white" : ""}`}>
                                         {component.label}
                                       </div>
                                     </div>
-                                    <p className={`line-clamp-2 text-sm leading-snug ${isChildActive ? "text-white/90" : "text-muted-foreground"}`}>
+                                    <p className={`line-clamp-2 text-sm leading-snug ${isChildActive ? "text-white" : "text-muted-foreground"}`}>
                                       {component.description}
                                     </p>
                                   </Link>
@@ -203,7 +207,7 @@ export default function Component() {
         <div className="flex flex-1 items-center justify-end gap-4">
           {/* User menu */}
           <SessionProvider>
-            <UserMenu/>
+            <UserMenu />
           </SessionProvider>
         </div>
       </div>

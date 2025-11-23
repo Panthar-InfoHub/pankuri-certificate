@@ -15,6 +15,7 @@ import { DeleteVideoDialog } from "./delete-video-dialog"
 import { toast } from "sonner"
 import { useState } from "react"
 import { VideoPlayer } from "./VideoPlayer"
+import { formatDuration } from "@/lib/utils"
 
 export const videoColumns = [
     {
@@ -39,10 +40,7 @@ export const videoColumns = [
         accessorKey: "duration",
         header: "Duration",
         cell: ({ row }) => {
-            const seconds = row.original.duration
-            const minutes = Math.floor(seconds / 60)
-            const secs = seconds % 60
-            return `${minutes}:${secs.toString().padStart(2, "0")}`
+           return formatDuration(row.original.duration)
         },
     },
     {

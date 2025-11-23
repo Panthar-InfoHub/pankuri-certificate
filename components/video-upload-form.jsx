@@ -14,6 +14,7 @@ import axios from "axios"
 import { createVideo } from "@/lib/backend_actions/videos"
 import { Field } from "./ui/field"
 import { useRouter } from "next/navigation"
+import { determineQuality, formatDuration, getVideoMetadata } from "@/lib/utils"
 
 const CHUNK_SIZE = 10 * 1024 * 1024 // 10 mb 
 
@@ -170,10 +171,28 @@ export function VideoUploadForm({ onSuccess }) {
         form.setFieldValue("thumbnail", file)
     }
 
-    const handleVideoChange = (e) => {
+    const handleVideoChange = async (e) => {
         const file = e.target.files?.[0] || null
         form.setFieldValue("video", file)
         console.log("Form state after:", form.state.values.video)
+
+        try {
+
+            const metadata = await getVideoMetadata(file)
+            const quality = determineQuality(metadata.height)
+            form.setFieldValue("videoQuality", quality)
+            form.setFieldValue("duration", metadata.duration.toString())
+
+            const isShort = metadata.duration < 60
+            form.setFieldValue("isShort", isShort)
+
+            toast.success(
+                `Video analyzed: ${quality}p (${metadata.width}x${metadata.height}), ${formatDuration(metadata.duration)}${isShort ? ' - Short detected!' : ''}`
+            )
+        } catch (error) {
+            console.error("Failed to extract video metadata:", error)
+            toast.warning("Could not auto-detect video properties. Please set manually.")
+        }
     }
 
     const handleDurationChange = (e) => {
@@ -248,6 +267,26 @@ export function VideoUploadForm({ onSuccess }) {
 
             )}
 
+            {/* Video Upload Field */}
+            <form.Field
+                name="video"
+                children={(field) => (
+                    <div className="space-y-2">
+                        <Label htmlFor="video">Video Upload</Label>
+                        <Input
+                            id="video"
+                            type="file"
+                            accept="video/*"
+                            onChange={handleVideoChange}
+                            disabled={isPending}
+                            className="cursor-pointer"
+                        />
+                        {field.state.value && <p className="text-sm text-muted-foreground">Selected: {field.state.value.name}</p>}
+                        <p className="text-xs text-muted-foreground">Choose the video file to upload (MP4, WebM, etc.)</p>
+                    </div>
+                )}
+            />
+
             {/* Video Quality Select Field */}
             <Field orientation="horizontal">
                 <form.Field
@@ -264,12 +303,10 @@ export function VideoUploadForm({ onSuccess }) {
                                     <SelectValue placeholder="Select video quality" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="360">360p</SelectItem>
                                     <SelectItem value="480">480p</SelectItem>
                                     <SelectItem value="720">720p (HD)</SelectItem>
                                     <SelectItem value="1080">1080p (Full HD)</SelectItem>
-                                    <SelectItem value="1440">1440p (2K)</SelectItem>
-                                    <SelectItem value="2160">2160p (4K)</SelectItem>
-                                    <SelectItem value="4320">4320p (8K)</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="text-xs text-muted-foreground">Choose the output quality for your uploaded video</p>
@@ -302,44 +339,6 @@ export function VideoUploadForm({ onSuccess }) {
 
             </Field>
 
-            {/* Video Upload Field */}
-            <form.Field
-                name="video"
-                children={(field) => (
-                    <div className="space-y-2">
-                        <Label htmlFor="video">Video Upload</Label>
-                        <Input
-                            id="video"
-                            type="file"
-                            accept="video/*"
-                            onChange={handleVideoChange}
-                            disabled={isPending}
-                            className="cursor-pointer"
-                        />
-                        {field.state.value && <p className="text-sm text-muted-foreground">Selected: {field.state.value.name}</p>}
-                        <p className="text-xs text-muted-foreground">Choose the video file to upload (MP4, WebM, etc.)</p>
-                    </div>
-                )}
-            />
-
-            {/* Duration Field */}
-            <form.Field
-                name="duration"
-                children={(field) => (
-                    <div className="space-y-2">
-                        <Label htmlFor="duration">Duration</Label>
-                        <Input
-                            id="duration"
-                            type="text"
-                            placeholder="e.g., 5:30 or 330 seconds"
-                            value={field.state.value}
-                            onChange={handleDurationChange}
-                            disabled={isPending}
-                        />
-                        <p className="text-xs text-muted-foreground">Enter the video duration (format: MM:SS or total seconds)</p>
-                    </div>
-                )}
-            />
 
             {/* Upload Progress Section */}
             {isPending && totalParts > 0 && (
@@ -393,6 +392,27 @@ export function VideoUploadForm({ onSuccess }) {
                     </CardContent>
                 </Card>
             )}
+
+
+
+            {/* Duration Field */}
+            <form.Field
+                name="duration"
+                children={(field) => (
+                    <div className="space-y-2">
+                        <Label htmlFor="duration">Duration</Label>
+                        <Input
+                            id="duration"
+                            type="text"
+                            placeholder="e.g., 5:30 or 330 seconds"
+                            value={field.state.value}
+                            onChange={handleDurationChange}
+                            disabled={isPending}
+                        />
+                        <p className="text-xs text-muted-foreground">Enter the video duration (format: MM:SS or total seconds)</p>
+                    </div>
+                )}
+            />
 
             {/* Submit Button */}
             <div className="flex justify-end gap-2 pt-4">

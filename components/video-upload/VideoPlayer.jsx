@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getVideoPlaybackUrl } from '@/lib/action';
 
 
-export function VideoPlayer({ isOpen, onClose, video }) {
+export function VideoPlayer({ isOpen, onClose, video, children }) {
     const [signedUrl, setSignedUrl] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         if (!isOpen || !video.id) {
@@ -46,7 +47,8 @@ export function VideoPlayer({ isOpen, onClose, video }) {
     }, [isOpen, video.id]);
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen ? isOpen : open} onOpenChange={onClose ? onClose : setOpen}>
+            {children && <DialogTrigger asChild>{children}</DialogTrigger>}
             <DialogContent className="max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>{video.title}</DialogTitle>
