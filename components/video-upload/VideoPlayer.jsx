@@ -1,5 +1,4 @@
-'use client';
-
+"use client"
 import { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -9,57 +8,51 @@ import { getVideoPlaybackUrl } from '@/lib/action';
 
 
 export function VideoPlayer({ isOpen, onClose, video, children }) {
+    console.log("VideoPlayer video:", video);
+    const [open, setOpen] = useState(false);
     const [signedUrl, setSignedUrl] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [open, setOpen] = useState(false);
+
+    const effectiveOpen = typeof isOpen === 'boolean' ? isOpen : open;
+    const effectiveOnClose = onClose ? onClose : () => setOpen(false);
 
     useEffect(() => {
-        if (!isOpen || !video.id) {
+        if (!effectiveOpen || !video.id) {
             setSignedUrl(null);
             return;
         }
-
         let isMounted = true;
+        setLoading(true);
 
-        const fetchUrl = async () => {
-            setLoading(true);
-
-            const result = await getVideoPlaybackUrl(video.playbackUrl);
-
-            if (!isMounted) return;
-            console.log("result ==> ", result)
-
-            if (result.success && result.url) {
-                setSignedUrl(result.url);
-            } else {
-                toast.error(result.error || 'Failed to load video');
-                onClose();
-            }
-
-            setLoading(false);
-        };
-
-        fetchUrl();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [isOpen, video.id]);
+        getVideoPlaybackUrl(video.playbackUrl)
+            .then(result => {
+                if (!isMounted) return;
+                if (result.success && result.url) {
+                    setSignedUrl(result.url);
+                } else {
+                    toast.error(result.error || 'Failed to load video');
+                    effectiveOnClose();
+                }
+                setLoading(false);
+            });
+        return () => { isMounted = false; };
+    }, [effectiveOpen, video.id]);
 
     return (
-        <Dialog open={isOpen ? isOpen : open} onOpenChange={onClose ? onClose : setOpen}>
+        <Dialog open={effectiveOpen} onOpenChange={val => {
+            setOpen(val);
+            if (onClose) onClose(val);
+        }}>
             {children && <DialogTrigger asChild>{children}</DialogTrigger>}
             <DialogContent className="max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>{video.title}</DialogTitle>
                 </DialogHeader>
-
                 <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
                     {loading ? (
                         <Loader2 className="w-8 h-8 animate-spin text-white" />
                     ) : signedUrl ? (
                         <ReactPlayer
-                            // url={signedUrl}
                             src={signedUrl}
                             controls
                             playing

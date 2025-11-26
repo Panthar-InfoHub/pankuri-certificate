@@ -1,17 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -27,12 +18,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
-import { MoreHorizontal, Eye, Pencil, Trash2, BookOpen, Clock, ListOrdered } from "lucide-react"
-import { toast } from "sonner"
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
 import { updateModuleStatus } from "@/lib/backend_actions/module"
-import EditModuleDialog from "./edit-module-dialog"
+import { BookOpen, Clock, ListOrdered, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toast } from "sonner"
 import DeleteModuleDialog from "./delete-module-dialog"
+import EditModuleDialog from "./edit-module-dialog"
 
 const STATUS_BADGES = {
     draft: { variant: "secondary", label: "Draft" },
@@ -42,7 +42,6 @@ const STATUS_BADGES = {
 
 export default function ModulesTable({ modules, courses, selectedCourseId }) {
     const router = useRouter()
-    const [editingModule, setEditingModule] = useState(null)
     const [deletingModule, setDeletingModule] = useState(null)
 
     const handleStatusToggle = async (moduleId, currentStatus) => {
@@ -128,15 +127,15 @@ export default function ModulesTable({ modules, courses, selectedCourseId }) {
                                 </TableRow>
                             ) : (
                                 modules.map((module) => (
-                                    <TableRow key={module.id} onClick={() => { router.push(`/module/${module.id}`) }} className="group cursor-pointer">
-                                        <TableCell>
+                                    <TableRow key={module.id} className="group cursor-pointer">
+                                        <TableCell onClick={() => { router.push(`/module/${module.id}`) }} >
                                             <div>
                                                 <span className="w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm flex items-center justify-center" >
                                                     {module.sequence}
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell onClick={() => { router.push(`/module/${module.id}`) }} >
                                             <div>
                                                 <p className="font-medium group-hover:text-primary transition-colors">
                                                     {module.title}
@@ -148,21 +147,23 @@ export default function ModulesTable({ modules, courses, selectedCourseId }) {
                                                 )}
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell onClick={() => { router.push(`/module/${module.id}`) }} >
                                             <span className="text-sm">{getCourseName(module.courseId)}</span>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell onClick={() => { router.push(`/module/${module.id}`) }} >
                                             <Badge variant={STATUS_BADGES[module.status]?.variant}>
                                                 {STATUS_BADGES[module.status]?.label}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-center">
+                                        <TableCell className="text-center" onClick={() => { router.push(`/module/${module.id}`) }}
+                                        >
                                             <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
                                                 <ListOrdered className="h-3 w-3" />
                                                 <span>{module._count?.lessons || 0}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-center">
+                                        <TableCell className="text-center" onClick={() => { router.push(`/module/${module.id}`) }}
+                                        >
                                             {module.duration ? (
                                                 <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
                                                     <Clock className="h-3 w-3" />
@@ -172,7 +173,7 @@ export default function ModulesTable({ modules, courses, selectedCourseId }) {
                                                 <span className="text-xs text-muted-foreground">-</span>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right" >
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" size="sm">
@@ -184,7 +185,7 @@ export default function ModulesTable({ modules, courses, selectedCourseId }) {
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem asChild>
                                                         <EditModuleDialog module={module} courses={courses}>
-                                                            <Button variant="ghost" className="w-full justify-start p-0">
+                                                            <Button variant="ghost" type="button" className="w-full justify-start p-0">
                                                                 <Pencil className="mr-2 h-4 w-4" />
                                                                 Edit
                                                             </Button>

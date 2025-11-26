@@ -84,7 +84,7 @@ export function VideoCombobox({ value, onValueChange, disabled }) {
                             <span className="truncate">{selectedVideo.title}</span>
                         </div>
                     ) : (
-                        <span className="text-muted-foreground">Select demo video...</span>
+                        <span className="text-muted-foreground">Select video...</span>
                     )}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>

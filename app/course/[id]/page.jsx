@@ -133,7 +133,7 @@ async function CourseDetailContent({ courseId }) {
                                     </CardDescription>
                                 </div>
                                 {course.demoVideoId && (
-                                    <VideoPlayer video={{ id: course.demoVideoId, title: "Course Demo Video", thumbnailUrl: course.thumbnailImage }}>
+                                    <VideoPlayer video={{ id: course.demoVideo.id, title: "Course Demo Video", thumbnailUrl: course.thumbnailImage, playbackUrl: course.demoVideo.playbackUrl }}>
                                         <Button variant="gradient" size="sm">
                                             <PlayCircle className="mr-2 h-4 w-4" />
                                             Watch Demo
@@ -142,7 +142,7 @@ async function CourseDetailContent({ courseId }) {
                                 )}
                             </div>
                         </CardHeader>
-                        <CardContent className="pt-6">
+                        <CardContent className="py-4">
                             {course._count.lessons === 0 && course.stats.totalModules === 0 ? (
                                 <div className="text-center py-12 text-muted-foreground">
                                     <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-30" />

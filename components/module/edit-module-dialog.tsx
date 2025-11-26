@@ -15,8 +15,8 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import {
     Select,
     SelectContent,
@@ -101,13 +101,9 @@ export default function EditModuleDialog({ module, courses, children }) {
                     {/* Course Selection */}
                     <form.Field
                         name="courseId"
-                        validators={{
-                            onChange: moduleSchema.shape.courseId,
-                        }}
-                    >
-                        {(field) => (
-                            <div className="space-y-2">
-                                <Label htmlFor={field.name}>Course *</Label>
+                        children={(field) => (
+                            <Field className="space-y-2">
+                                <FieldLabel htmlFor={field.name}>Course *</FieldLabel>
                                 <Select
                                     value={field.state.value}
                                     onValueChange={(value) => field.handleChange(value)}
@@ -123,46 +119,34 @@ export default function EditModuleDialog({ module, courses, children }) {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {field.state.meta.errors && (
-                                    <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-                                )}
-                            </div>
+                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                            </Field>
                         )}
-                    </form.Field>
+                    />
 
                     {/* Title */}
                     <form.Field
                         name="title"
-                        validators={{
-                            onChange: moduleSchema.shape.title,
-                        }}
-                    >
-                        {(field) => (
-                            <div className="space-y-2">
-                                <Label htmlFor={field.name}>Module Title *</Label>
+                        children={(field) => (
+                            <Field className="space-y-2">
+                                <FieldLabel htmlFor={field.name}>Module Title *</FieldLabel>
                                 <Input
                                     id={field.name}
                                     value={field.state.value}
                                     onChange={(e) => field.handleChange(e.target.value)}
                                     placeholder="e.g., Introduction to React"
                                 />
-                                {field.state.meta.errors && (
-                                    <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-                                )}
-                            </div>
+                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                            </Field>
                         )}
-                    </form.Field>
+                    />
 
                     {/* Slug */}
                     <form.Field
                         name="slug"
-                        validators={{
-                            onChange: moduleSchema.shape.slug,
-                        }}
-                    >
-                        {(field) => (
-                            <div className="space-y-2">
-                                <Label htmlFor={field.name}>Slug *</Label>
+                        children={(field) => (
+                            <Field className="space-y-2">
+                                <FieldLabel htmlFor={field.name}>Slug *</FieldLabel>
                                 <Input
                                     id={field.name}
                                     value={field.state.value}
@@ -172,18 +156,17 @@ export default function EditModuleDialog({ module, courses, children }) {
                                 <p className="text-xs text-muted-foreground">
                                     Use lowercase letters, numbers, and hyphens only.
                                 </p>
-                                {field.state.meta.errors && (
-                                    <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-                                )}
-                            </div>
+                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                            </Field>
                         )}
-                    </form.Field>
+                    />
 
                     {/* Description */}
-                    <form.Field name="description">
-                        {(field) => (
-                            <div className="space-y-2">
-                                <Label htmlFor={field.name}>Description</Label>
+                    <form.Field
+                        name="description"
+                        children={(field) => (
+                            <Field className="space-y-2">
+                                <FieldLabel htmlFor={field.name}>Description</FieldLabel>
                                 <Textarea
                                     id={field.name}
                                     value={field.state.value}
@@ -191,21 +174,17 @@ export default function EditModuleDialog({ module, courses, children }) {
                                     placeholder="Brief description of what this module covers"
                                     rows={3}
                                 />
-                            </div>
+                            </Field>
                         )}
-                    </form.Field>
+                    />
 
                     <div className="grid grid-cols-3 gap-4">
                         {/* Sequence */}
                         <form.Field
                             name="sequence"
-                            validators={{
-                                onChange: moduleSchema.shape.sequence,
-                            }}
-                        >
-                            {(field) => (
-                                <div className="space-y-2">
-                                    <Label htmlFor={field.name}>Sequence *</Label>
+                            children={(field) => (
+                                <Field className="space-y-2">
+                                    <FieldLabel htmlFor={field.name}>Sequence *</FieldLabel>
                                     <Input
                                         id={field.name}
                                         type="number"
@@ -213,23 +192,17 @@ export default function EditModuleDialog({ module, courses, children }) {
                                         value={field.state.value}
                                         onChange={(e) => field.handleChange(parseInt(e.target.value) || 1)}
                                     />
-                                    {field.state.meta.errors && (
-                                        <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-                                    )}
-                                </div>
+                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
                             )}
-                        </form.Field>
+                        />
 
                         {/* Duration */}
                         <form.Field
                             name="duration"
-                            validators={{
-                                onChange: moduleSchema.shape.duration,
-                            }}
-                        >
-                            {(field) => (
-                                <div className="space-y-2">
-                                    <Label htmlFor={field.name}>Duration (min)</Label>
+                            children={(field) => (
+                                <Field className="space-y-2">
+                                    <FieldLabel htmlFor={field.name}>Duration (min)</FieldLabel>
                                     <Input
                                         id={field.name}
                                         type="number"
@@ -238,20 +211,17 @@ export default function EditModuleDialog({ module, courses, children }) {
                                         onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
                                         placeholder="Optional"
                                     />
-                                </div>
+                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
                             )}
-                        </form.Field>
+                        />
 
                         {/* Status */}
                         <form.Field
                             name="status"
-                            validators={{
-                                onChange: moduleSchema.shape.status,
-                            }}
-                        >
-                            {(field) => (
-                                <div className="space-y-2">
-                                    <Label htmlFor={field.name}>Status *</Label>
+                            children={(field) => (
+                                <Field className="space-y-2">
+                                    <FieldLabel htmlFor={field.name}>Status *</FieldLabel>
                                     <Select
                                         value={field.state.value}
                                         onValueChange={(value) => field.handleChange(value)}
@@ -265,9 +235,10 @@ export default function EditModuleDialog({ module, courses, children }) {
                                             <SelectItem value="archived">Archived</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                </div>
+                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
                             )}
-                        </form.Field>
+                        />
                     </div>
 
                     <DialogFooter>

@@ -30,7 +30,7 @@ async function ModuleDetailContent({ moduleId }) {
             <div className="relative mb-12">
                 <div className={`bg-linear-to-br ${STATUS_CONFIG[module.status].color} to-transparent p-8 rounded-2xl border-2 shadow-lg`}>
                     <Link href="/module">
-                        <Button variant="secondary" size="sm" className="mb-6">
+                        <Button variant="gradient" size="sm" className="mb-6">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Modules
                         </Button>
@@ -52,9 +52,12 @@ async function ModuleDetailContent({ moduleId }) {
                                         {module.course.title}
                                     </Badge>
                                 )}
+                                <code className="text-xs bg-muted px-3 py-1 rounded-lg block break-all w-fit">
+                                    {module.slug}
+                                </code>
                             </div>
 
-                            <h1 className="text-5xl font-bold tracking-tight mb-4 text-gradient-brand">
+                            <h1 className="text-5xl font-bold  mb-4 text-gradient-brand">
                                 {module.title}
                             </h1>
 
@@ -90,8 +93,8 @@ async function ModuleDetailContent({ moduleId }) {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Lessons List */}
-                    <Card className="border-2 shadow-lg">
-                        <CardHeader className="bg-linear-to-br from-primary/5 to-transparent">
+                    <Card className="border-2 shadow-lg p-0!">
+                        <CardHeader className="bg-linear-to-br from-primary/5 to-transparent pt-4">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <CardTitle className="text-2xl">Module Lessons</CardTitle>
@@ -101,7 +104,7 @@ async function ModuleDetailContent({ moduleId }) {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="pt-6">
+                        <CardContent className="py-4">
                             {!module.lessons || module.lessons.length === 0 ? (
                                 <div className="text-center py-12 text-muted-foreground">
                                     <GraduationCap className="h-16 w-16 mx-auto mb-4 opacity-30" />
@@ -166,9 +169,9 @@ async function ModuleDetailContent({ moduleId }) {
                 <div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
                     {/* Course Card */}
                     {module.course && (
-                        <Card className="border-2 shadow-xl overflow-hidden">
+                        <Card className="border-2 shadow-xl overflow-hidden p-0!">
                             <div className="bg-linear-to-br from-blue-500/10 via-purple-500/10 to-transparent p-6">
-                                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground mb-4">
+                                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground py-4">
                                     Part of Course
                                 </CardTitle>
                                 <Link href={`/course/${module.course.id}`}>
@@ -200,11 +203,11 @@ async function ModuleDetailContent({ moduleId }) {
                     )}
 
                     {/* Module Info Card */}
-                    <Card className="border-2 shadow-lg">
-                        <CardHeader className="bg-linear-to-br from-green-500/5 to-transparent">
+                    <Card className="border-2 shadow-lg p-0!">
+                        <CardHeader className="bg-linear-to-br from-green-500/5 to-transparent pt-4">
                             <CardTitle className="text-lg">Module Details</CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-6 space-y-4">
+                        <CardContent className="py-4 space-y-4">
                             <div className="flex items-center justify-between py-2 border-b">
                                 <span className="text-sm text-muted-foreground flex items-center gap-2">
                                     <ListOrdered className="h-4 w-4" />
@@ -258,18 +261,6 @@ async function ModuleDetailContent({ moduleId }) {
                                     })}
                                 </span>
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Slug Info Card */}
-                    <Card className="border-2 shadow-lg">
-                        <CardHeader className="bg-linear-to-br from-orange-500/5 to-transparent">
-                            <CardTitle className="text-lg">URL Slug</CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <code className="text-sm bg-muted px-3 py-2 rounded-lg block break-all">
-                                {module.slug}
-                            </code>
                         </CardContent>
                     </Card>
                 </div>
