@@ -500,7 +500,7 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
                             </Button>
                         </DialogClose>
                         <Button type="submit" disabled={isSubmitting} variant="gradient" className="flex-1">
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isSubmitting && <> <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating... </>}
                             Update Lesson
                         </Button>
                     </Field>

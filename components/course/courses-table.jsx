@@ -74,8 +74,9 @@ export function CoursesTable({ courses, categories }) {
                 </TableHeader>
                 <TableBody>
                     {courses.map((course) => (
-                        <TableRow key={course.id} onClick={() => {router.push(`/course/${course.id}`)}} className="hover:bg-accent/50 cursor-pointer">
-                            <TableCell>
+                        <TableRow key={course.id} className="hover:bg-accent/50 cursor-pointer">
+                            <TableCell onClick={() => { router.push(`/course/${course.id}`) }}
+                            >
                                 {course.thumbnailImage ? (
                                     <div className="relative w-12 h-12 rounded overflow-hidden bg-muted">
                                         <Image
@@ -91,7 +92,8 @@ export function CoursesTable({ courses, categories }) {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell>
+                            <TableCell onClick={() => { router.push(`/course/${course.id}`) }}
+                            >
                                 <div className="max-w-[300px]">
                                     <p className="font-medium truncate">{course.title}</p>
                                     {course.description && (
@@ -100,19 +102,22 @@ export function CoursesTable({ courses, categories }) {
                                 </div>
                             </TableCell>
                             <TableCell className="text-muted-foreground">{getCategoryName(course.categoryId)}</TableCell>
-                            <TableCell>
+                            <TableCell onClick={() => { router.push(`/course/${course.id}`) }}
+                            >
                                 <Badge variant={LEVEL_BADGES[course.level] || "default"}>
                                     {course.level}
                                 </Badge>
                             </TableCell>
-                            <TableCell>{course.duration ? `${course.duration} min` : "—"}</TableCell>
-                            <TableCell className="uppercase">{course.language}</TableCell>
-                            <TableCell>
+                            <TableCell onClick={() => { router.push(`/course/${course.id}`) }}
+                            >{course.duration ? `${course.duration} min` : "—"}</TableCell>
+                            <TableCell onClick={() => { router.push(`/course/${course.id}`) }} className="uppercase">{course.language}</TableCell>
+                            <TableCell onClick={() => { router.push(`/course/${course.id}`) }}
+                            >
                                 <Badge variant={course.status === "active" ? "default" : "secondary"}>
                                     {course.status}
                                 </Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell  >
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="icon" disabled={isPending}>
@@ -148,7 +153,7 @@ export function CoursesTable({ courses, categories }) {
                                         <DropdownMenuItem asChild>
                                             <DeleteCourseDialog course={course}>
                                                 <Button variant="ghost" className="w-full justify-start p-0 text-destructive">
-                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
                                                     Delete
                                                 </Button>
                                             </DeleteCourseDialog>

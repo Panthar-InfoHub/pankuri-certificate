@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { upsertLessonDescription } from "@/lib/backend_actions/lesson"
 import { Field, FieldLabel } from "@/components/ui/field"
+import MDEditor from "@uiw/react-md-editor"
 
 export default function LessonDescriptionDialog({ lesson, children }) {
     const router = useRouter()
@@ -59,13 +60,14 @@ export default function LessonDescriptionDialog({ lesson, children }) {
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <Field className="space-y-2">
+                    <Field className="space-y-2" data-color-mode="light">
                         <FieldLabel htmlFor="textContent">Description Content *</FieldLabel>
-                        <Textarea
-                            id="textContent"
+
+                        <MDEditor
                             value={textContent}
-                            onChange={(e) => setTextContent(e.target.value)}
-                            placeholder={`# Lesson Overview ${"\n"}This lesson covers...${"\n"}
+                            onChange={setTextContent}
+                            textareaProps={{
+                                placeholder: `# Lesson Overview ${"\n"}This lesson covers...${"\n"}
 ## What You'll Learn
 - Key concept 1
 - Key concept 2
@@ -74,10 +76,21 @@ export default function LessonDescriptionDialog({ lesson, children }) {
 - Basic knowledge of...
 
 **Useful Resources:**
-- [Documentation](https://example.com)`}
+- [Documentation](https://example.com)`,
+                            }}
+                            previewOptions={{
+                                disallowedElements: ["style"]
+                            }}
+                            preview='edit' height={300}
+                        />
+
+                        {/* <Textarea
+                            id="textContent"
+                            value={textContent}
+                            onChange={(e) => setTextContent(e.target.value)}
                             rows={20}
                             className="font-mono text-sm"
-                        />
+                        /> */}
                         <p className="text-xs text-muted-foreground">
                             Markdown supported. Use # for headings, ** for bold, * for lists, etc.
                         </p>

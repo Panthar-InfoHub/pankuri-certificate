@@ -339,7 +339,7 @@ export function EditCategoryDialog({ category, parentCategories, children }) {
                                 </Button>
                             </DialogClose>
 
-                            <Button type="submit" disabled={isPending} className="flex-1">
+                            <Button type="submit" disabled={isPending} variant="gradient" className="flex-1">
                                 {isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -122,12 +122,12 @@ async function CourseDetailContent({ courseId }) {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
 
-                    {/* Course Content Overview */}
+                    {/* Course Module Overview */}
                     <Card className="border-2 shadow-lg p-0!">
                         <CardHeader className="bg-gradient-to-br from-primary/5 to-transparent pt-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-2xl">Course Content</CardTitle>
+                                    <CardTitle className="text-2xl">Course Modules</CardTitle>
                                     <CardDescription className="mt-2">
                                         {course.stats.totalModules} modules • {course._count.lessons} lessons
                                     </CardDescription>
@@ -153,7 +153,7 @@ async function CourseDetailContent({ courseId }) {
                                 <div className="space-y-3">
                                     {course.modules && course.modules.length > 0 ? (
                                         course.modules.map((module, idx) => (
-                                            <div key={module.id} className="group border-2 rounded-xl p-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
+                                            <Link href={`/module/${module.id}`} key={module.id} className="group border-2 flex rounded-xl p-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
                                                 <div className="flex items-start gap-4">
                                                     <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground font-bold shadow-md">
                                                         {idx + 1}
@@ -165,7 +165,7 @@ async function CourseDetailContent({ courseId }) {
                                                         )}
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </Link>
                                         ))
                                     ) : (
                                         <div className="text-center py-4 px-6 bg-muted/50 rounded-lg">
@@ -180,10 +180,10 @@ async function CourseDetailContent({ courseId }) {
                     {/* Tags */}
                     {course.tags && course.tags.length > 0 && (
                         <Card className="border-2 shadow-lg overflow-hidden p-0!">
-                            <CardHeader className="bg-gradient-to-br from-purple-500/5 to-transparent pt-4">
+                            <CardHeader className="bg-linear-to-br from-purple-500/5 to-transparent pt-4">
                                 <CardTitle className="flex items-center gap-2">
                                     <span className="text-2xl">🏷️</span>
-                                    Topics Covered
+                                    Course Tags
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="py-4">

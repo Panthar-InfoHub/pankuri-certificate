@@ -114,13 +114,13 @@ async function ModuleDetailContent({ moduleId }) {
                             ) : (
                                 <div className="space-y-3">
                                     {module.lessons.map((lesson, idx) => (
-                                        <div key={lesson.id} className="group border-2 rounded-xl p-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-                                            <div className="flex items-start gap-4">
+                                        <Link href={`/lesson/${lesson.id}`} key={lesson.id} className="group border-2 rounded-xl p-4 hover:border-primary/50 hover:shadow-md transition-all duration-200 w-full flex">
+                                            <div className="flex items-start gap-4 w-full">
                                                 <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 text-white font-bold shadow-md">
                                                     {lesson.sequence || idx + 1}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex items-start justify-between gap-4 flex-1">
                                                         <div>
                                                             <h4 className="font-semibold text-lg group-hover:text-primary transition-colors">
                                                                 {lesson.title}
@@ -143,7 +143,7 @@ async function ModuleDetailContent({ moduleId }) {
                                                     )}
                                                 </div>
                                             </div>
-                                        </div>
+                                        </Link>
                                     ))}
                                 </div>
                             )}

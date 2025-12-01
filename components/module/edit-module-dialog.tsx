@@ -250,8 +250,8 @@ export default function EditModuleDialog({ module, courses, children }) {
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Button type="submit" disabled={isSubmitting} variant="gradient">
+                            {isSubmitting && <> <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating... </>}
                             Update Module
                         </Button>
                     </DialogFooter>

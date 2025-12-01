@@ -1,4 +1,5 @@
 import DeleteAttachmentDialog from "@/components/lesson/delete-attachment-dialog"
+import DescriptionMarkdown from "@/components/lesson/description_markdown"
 import LessonDescriptionDialog from "@/components/lesson/lesson-description-dialog"
 import UploadAttachmentDialog from "@/components/lesson/upload-attachment-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
 import { getLessonById } from "@/lib/backend_actions/lesson"
+import MDEditor from "@uiw/react-md-editor"
 import { ArrowLeft, Calendar, Clock, Download, Edit, FileIcon, FileText, GraduationCap, Lock, Trash2, Unlock, Upload, Video } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -165,10 +167,8 @@ async function LessonDetailContent({ lessonId }: { lessonId: string }) {
                                 )}
                             </CardHeader>
                             <CardContent className="py-6">
-                                <div className="prose prose-sm max-w-none">
-                                    <pre className="whitespace-pre-wrap bg-muted p-6 rounded-lg text-sm">
-                                        {lesson.textLesson.content}
-                                    </pre>
+                                <div className="prose prose-sm max-w-none bg-muted" data-color-mode="light">
+                                    <DescriptionMarkdown value={lesson.textLesson.content} />
                                 </div>
                             </CardContent>
                         </Card>
@@ -190,9 +190,7 @@ async function LessonDetailContent({ lessonId }: { lessonId: string }) {
                         {lesson.lessonDescription && (
                             <CardContent className="py-6">
                                 <div className="prose prose-sm max-w-none">
-                                    <pre className="whitespace-pre-wrap bg-muted p-6 rounded-lg text-sm">
-                                        {lesson.lessonDescription.textContent}
-                                    </pre>
+                                    <DescriptionMarkdown value={lesson.lessonDescription.textContent} />
                                 </div>
                             </CardContent>
                         )}
@@ -333,12 +331,12 @@ async function LessonDetailContent({ lessonId }: { lessonId: string }) {
                             <CardHeader className="bg-linear-to-br from-indigo-500/5 to-transparent pt-4">
                                 <CardTitle className="text-lg">Module</CardTitle>
                             </CardHeader>
-                            <CardContent className="py-6">
+                            <CardContent className="py-4">
                                 <Link href={`/module/${lesson.module.id}`}>
                                     <div className="group cursor-pointer">
                                         <div className="flex items-center gap-3 mb-2">
                                             <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary font-bold flex items-center justify-center">
-                                                {lesson.module.sequence}
+                                                -
                                             </div>
                                             <p className="font-bold group-hover:text-primary transition-colors">
                                                 {lesson.module.title}
