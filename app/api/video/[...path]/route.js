@@ -1,3 +1,4 @@
+import { auth } from '@/lib/auth';
 import { s3Client } from '@/lib/clientS3';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { NextResponse } from 'next/server';
@@ -5,6 +6,12 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
     try {
+
+        const session = await auth().catch(() => null)
+        if (!session.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { path } = await params;
         const filePath = path.join('/');
         console.debug("\n filePath: ", filePath)

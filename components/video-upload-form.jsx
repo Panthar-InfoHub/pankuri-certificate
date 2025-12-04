@@ -43,7 +43,7 @@ export function VideoUploadForm({ onSuccess }) {
 
                 const file = value.video
                 const bucketName = "pankhuri-v3"
-                const key = `videos/${Date.now()}_${file.name}`
+                const key = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/videos/${Date.now()}_${file.name}`
 
                 try {
                     // 1. Create a multipart upload to get an UploadId
@@ -107,7 +107,7 @@ export function VideoUploadForm({ onSuccess }) {
 
                     if (value.thumbnail) {
                         const thumbnailUploadPromise = (async () => {
-                            const thumbnailKey = `video-thumbnails/${Date.now()}_${value.thumbnail.name}`
+                            const thumbnailKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/video-thumbnails/${Date.now()}_${value.thumbnail.name}`
                             const { url } = await generatePresignedUrlForImage(bucketName, thumbnailKey, value.thumbnail.type)
                             await axios.put(url, value.thumbnail,
                                 {

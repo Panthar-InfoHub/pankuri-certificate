@@ -79,7 +79,7 @@ export function EditCourseDialog({ course, categories, children }) {
                     // Upload thumbnail if new file selected
                     if (thumbnailFile) {
                         toast.info("Uploading thumbnail...")
-                        const thumbnailKey = `course-thumbnails/${Date.now()}_${thumbnailFile.name}`
+                        const thumbnailKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/course-thumbnails/${Date.now()}_${thumbnailFile.name}`
                         const { url } = await generatePresignedUrlForImage(bucketName, thumbnailKey, thumbnailFile.type)
 
                         await axios.put(url, thumbnailFile, {
@@ -102,7 +102,7 @@ export function EditCourseDialog({ course, categories, children }) {
                     // Upload cover if new file selected
                     if (coverFile) {
                         toast.info("Uploading cover image...")
-                        const coverKey = `course-covers/${Date.now()}_${coverFile.name}`
+                        const coverKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/course-covers/${Date.now()}_${coverFile.name}`
                         const { url } = await generatePresignedUrlForImage(bucketName, coverKey, coverFile.type)
 
                         await axios.put(url, coverFile, {

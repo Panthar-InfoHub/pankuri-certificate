@@ -34,6 +34,12 @@ export function VideoPlayer({ isOpen, onClose, video, children }) {
                     effectiveOnClose();
                 }
                 setLoading(false);
+            }).catch(error => {
+                if (!isMounted) return;
+                toast.error('Failed to load video');
+                console.error('Error fetching video playback URL:', error);
+            }).finally(() => {
+                setLoading(false);
             });
         return () => { isMounted = false; };
     }, [effectiveOpen, video.id]);

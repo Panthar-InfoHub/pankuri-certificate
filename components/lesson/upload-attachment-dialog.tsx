@@ -57,7 +57,7 @@ export default function UploadAttachmentDialog({ lessonId, children }) {
 
                     const bucketName = "pankhuri-v3"
                     const fileExtension = attachmentFile.name.split('.').pop()
-                    const key = `lesson_attachments/${Date.now()}_${lessonId}.${fileExtension}`
+                    const key = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/lesson_attachments/${Date.now()}_${lessonId}.${fileExtension}`
 
                     // Upload file to DigitalOcean Spaces
                     const { url } = await generatePresignedUrlForImage(bucketName, key, attachmentFile.type)

@@ -45,6 +45,7 @@ const courseSchema = z.object({
 })
 
 export function CreateCourseDialog({ children, categories, trainers = [] }) {
+    console.log("create course dialog rendered..")
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
     const [thumbnailPreview, setThumbnailPreview] = useState("")
@@ -81,7 +82,7 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                     // Upload thumbnail if selected
                     if (thumbnailFile) {
                         toast.info("Uploading thumbnail...")
-                        const thumbnailKey = `course-thumbnails/${Date.now()}_${thumbnailFile.name}`
+                        const thumbnailKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/course-thumbnails/${Date.now()}_${thumbnailFile.name}`
                         const { url } = await generatePresignedUrlForImage(bucketName, thumbnailKey, thumbnailFile.type)
 
                         await axios.put(url, thumbnailFile, {
@@ -98,7 +99,7 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                     // Upload cover if selected
                     if (coverFile) {
                         toast.info("Uploading cover image...")
-                        const coverKey = `course-covers/${Date.now()}_${coverFile.name}`
+                        const coverKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/course-covers/${Date.now()}_${coverFile.name}`
                         const { url } = await generatePresignedUrlForImage(bucketName, coverKey, coverFile.type)
 
                         await axios.put(url, coverFile, {
@@ -150,9 +151,19 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
         form.setFieldValue("coverImage", "")
     }
 
+    const handleTitleChange = (value) => {
+        const slug = value
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .trim()
+        form.setFieldValue("slug", slug)
+    }
+
     return (
         <Dialog>
-            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogTrigger >{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                     <DialogTitle>Create New Course</DialogTitle>
@@ -177,7 +188,10 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                                         placeholder="Enter course title"
                                         disabled={isPending}
                                         value={field.state.value}
-                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        onChange={(e) => {
+                                            field.handleChange(e.target.value)
+                                            handleTitleChange(e.target.value)
+                                        }}
                                         onBlur={field.handleBlur}
                                     />
                                     {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
@@ -259,7 +273,7 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {trainers.map((trainer) => (
-                                                <SelectItem key={trainer.id} value={trainer.userId}>
+                                                <SelectItem key={trainer.user.id} value={trainer.user.id}>
                                                     {trainer.user.displayName}
                                                 </SelectItem>
                                             ))}
@@ -445,7 +459,7 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                             )}
                         />
 
-                        <Field orientation="horizaontal">
+                        <Field orientation="horizontal">
                             <DialogClose asChild>
                                 <Button type="button" variant="outline" disabled={isPending} className="flex-1">
                                     Cancel

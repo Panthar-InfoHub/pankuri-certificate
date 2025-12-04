@@ -11,7 +11,7 @@ const page = async () => {
 
     const res = await getAllVideos()
     const videos = res.success ? res.data : []
-    console.log("Video upload page getAllVideos ==> ", res)
+    // console.log("Video upload page getAllVideos ==> ", res)
 
     return (
         <main className="min-h-screen p-4 sm:p-6 md:p-8 mt-24 ">

@@ -1,11 +1,11 @@
+import AddTrainerDialog from "@/components/course/add-trainer-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
 import { VideoPlayer } from "@/components/video-upload/VideoPlayer"
 import { getCourseById } from "@/lib/backend_actions/course"
-import { ArrowLeft, Award, BookOpen, Calendar, Car, Clock, Globe, GraduationCap, PlayCircle, Video } from "lucide-react"
+import { ArrowLeft, Award, BookOpen, Calendar, Clock, Edit, Globe, GraduationCap, PlayCircle } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -19,8 +19,7 @@ async function CourseDetailContent({ courseId }) {
     }
 
     const course = result.data
-    console.log("Course Data:", course)
-
+    // console.log("Course Data:", course)
     return (
         <>
             {/* Hero Section with Cover Image */}
@@ -211,8 +210,20 @@ async function CourseDetailContent({ courseId }) {
                     {/* Instructor Card - Featured */}
                     {course.trainer && (
                         <Card className="border-2 shadow-xl overflow-hidden p-0!">
-                            <div className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-transparent p-6">
-                                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground mb-4">Your Instructor</CardTitle>
+
+                            <CardHeader className="bg-linear-to-br from-purple-500/5 to-transparent pt-4">
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground mb-4">Your Instructor</CardTitle>
+                                    <AddTrainerDialog trainerId={course.trainer.user.id} courseId={courseId}>
+                                        <Button variant="gradient" size="sm">
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            {course.trainer ? "Edit" : "Add"} Trainer
+                                        </Button>
+                                    </AddTrainerDialog>
+                                </div>
+                            </CardHeader>
+
+                            {course.trainer.user ? <CardContent className="py-6">
                                 <div className="flex items-center gap-4">
                                     {course.trainer.user.profileImage && (
                                         <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-background shadow-lg">
@@ -229,7 +240,15 @@ async function CourseDetailContent({ courseId }) {
                                         <p className="text-xs text-muted-foreground">{course.trainer.user.email}</p>
                                     </div>
                                 </div>
-                            </div>
+                            </CardContent> : <CardContent className="pt-6">
+                                <p className="text-sm text-muted-foreground text-center py-8">
+                                    No trainer added yet. Click &quot;Add Description&quot; to provide an overview of this course.
+                                </p>
+                            </CardContent>}
+
+
+
+
                         </Card>
                     )}
 
@@ -338,7 +357,7 @@ async function CourseDetailContent({ courseId }) {
                         </CardContent>
                     </Card>
                 </div>
-            </div>
+            </div >
         </>
     )
 }

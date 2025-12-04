@@ -66,7 +66,7 @@ export function CreateCategoryDialog({
                     if (imageFile) {
                         toast.info("Uploading icon...")
                         const bucketName = "pankhuri-v3"
-                        const iconKey = `category-icons/${Date.now()}_${imageFile.name}`
+                        const iconKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/category-icons/${Date.now()}_${imageFile.name}`
 
                         const { url } = await generatePresignedUrlForImage(bucketName, iconKey, imageFile.type)
 
