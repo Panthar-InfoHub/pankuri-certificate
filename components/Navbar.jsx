@@ -1,5 +1,5 @@
 "use client"
-import { BookCheck, ContactRound, GraduationCap, Menu, Tv, X } from "lucide-react"
+import { BookCheck, ContactRound, Crown, GraduationCap, Menu, Tv, X } from "lucide-react"
 
 import UserMenu from "@/components/navbar-components/user-menu"
 import { Button } from "@/components/ui/button"
@@ -36,7 +36,14 @@ const navigationLinks = [
       { href: "/lesson", label: "Lesson", icon: BookCheck, description: "Manage lessons" },
     ]
   },
-  { href: "/trainer", label: "Trainer Management", icon: ContactRound },
+  {
+    href: "/#", label: "User Management", icon: Crown,
+    children: [
+      { href: "/trainer", label: "Trainer", icon: ContactRound, description: "Manage trainers" },
+      { href: "/user", label: "Admin Management", icon: Crown, description: "Manage admins" },
+    ]
+  },
+
 ]
 
 export default function Component() {
@@ -69,8 +76,8 @@ export default function Component() {
                     return (
                       <div key={index} className="space-y-2">
                         <div className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${isActive
-                            ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                            : "text-foreground"
+                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                          : "text-foreground"
                           }`}>
                           <Icon size={18} className={isActive ? "text-white" : "text-muted-foreground"} />
                           <span>{link.label}</span>
@@ -85,8 +92,8 @@ export default function Component() {
                                 href={child.href}
                                 onClick={() => setOpen(false)}
                                 className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-colors ${isChildActive
-                                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md"
-                                    : "hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100"
+                                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md"
+                                  : "hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100"
                                   }`}
                               >
                                 <ChildIcon size={16} className={`mt-0.5 shrink-0 ${isChildActive ? "text-white" : "text-muted-foreground"}`} />
@@ -112,8 +119,8 @@ export default function Component() {
                       href={link.href}
                       onClick={() => setOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive
-                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                          : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100"
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                        : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100"
                         }`}
                     >
                       <Icon size={18} className={isActive ? "text-white" : "text-muted-foreground"} />
@@ -129,7 +136,7 @@ export default function Component() {
             <NavigationMenuList className="gap-2">
               {navigationLinks.map((link, index) => {
                 const Icon = link.icon
-                const isActive = (pathname === "/" && link.href === "/") || (pathname.includes(((link.href).split("/")[1])) && link.href !== "/")
+                const isActive = (pathname === "/" && link.href === "/") || (pathname.includes(((link.href).split("/")[1])) && link.href !== "/") || link?.children?.some(child => pathname === child.href)
                 return (
                   link.children ?
                     <NavigationMenuItem key={index} >
@@ -144,7 +151,7 @@ export default function Component() {
                         <ul className="grid gap-2 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                           {link.children.map((component, i) => {
                             const ChildIcon = component.icon
-                            const isChildActive = (pathname === "/" && link.href === "/") || (pathname.includes(((link.href).split("/")[1])) && link.href !== "/")
+                            const isChildActive = (pathname === "/" && component.href === "/") || (pathname.includes(((component.href).split("/")[1])) && link.href !== "/")
                             return (
                               <li key={`menu-${i}`}>
                                 <NavigationMenuLink asChild>

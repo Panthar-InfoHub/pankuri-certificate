@@ -1,13 +1,13 @@
-import { Suspense } from "react"
-import { TrainersTable } from "@/components/trainer/trainers-table"
 import { CreateTrainerDialog } from "@/components/trainer/create-trainer-dialog"
+import { TrainersTable } from "@/components/trainer/trainers-table"
 import { Button } from "@/components/ui/button"
-import { TableSkeleton, PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
+import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
 import { getAllTrainersAdmin } from "@/lib/backend_actions/trainer"
 import { Plus } from "lucide-react"
+import { Suspense } from "react"
 
 async function TrainersContent() {
-  const result = await getAllTrainersAdmin({ limit: 100, status: "active" })
+  const result = await getAllTrainersAdmin({ limit: 50, status: "active" })
   const trainers = result.success ? result.data : []
 
   return (
