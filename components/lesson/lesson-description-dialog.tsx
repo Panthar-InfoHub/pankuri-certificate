@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -12,18 +10,28 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Loader2 } from "lucide-react"
-import { toast } from "sonner"
-import { upsertLessonDescription } from "@/lib/backend_actions/lesson"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { upsertLessonDescription } from "@/lib/backend_actions/lesson"
 import MDEditor from "@uiw/react-md-editor"
+import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 export default function LessonDescriptionDialog({ lesson, children }) {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [textContent, setTextContent] = useState(lesson.lessonDescription?.textContent || "")
+
+    useEffect(() => {
+        if (!open) {
+            // Reset body styles that Radix might have left behind
+            document.body.style.overflow = ''
+            document.body.style.paddingRight = ''
+            document.body.removeAttribute('data-scroll-locked')
+        }
+    }, [open])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -49,7 +57,7 @@ export default function LessonDescriptionDialog({ lesson, children }) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl " onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>
                         {lesson.lessonDescription ? "Edit" : "Add"} Lesson Description
@@ -81,16 +89,10 @@ export default function LessonDescriptionDialog({ lesson, children }) {
                             previewOptions={{
                                 disallowedElements: ["style"]
                             }}
-                            preview='edit' height={300}
+                            preview='edit'
+                            height={300}
+                            minHeight={200}
                         />
-
-                        {/* <Textarea
-                            id="textContent"
-                            value={textContent}
-                            onChange={(e) => setTextContent(e.target.value)}
-                            rows={20}
-                            className="font-mono text-sm"
-                        /> */}
                         <p className="text-xs text-muted-foreground">
                             Markdown supported. Use # for headings, ** for bold, * for lists, etc.
                         </p>

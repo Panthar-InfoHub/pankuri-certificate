@@ -20,10 +20,10 @@ export default function UploadVideoDialog({ children }) {
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent>
-                <ScrollArea className="max-w-2xl max-h-[90vh]  rounded-md ">
-                    <DialogHeader>
-                        <DialogTitle className="space-y-2" >Upload Video</DialogTitle>
+            <DialogContent className="max-w-5xl w-[95vw]">
+                <ScrollArea className="max-h-[85vh] pr-4">
+                    <DialogHeader className="mb-4">
+                        <DialogTitle>Upload Video</DialogTitle>
                         <DialogDescription>
                             Upload your thumbnail, select video quality, and upload your video file.
                         </DialogDescription>

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
 import { getLessonById } from "@/lib/backend_actions/lesson"
-import MDEditor from "@uiw/react-md-editor"
 import { ArrowLeft, Calendar, Clock, Download, Edit, FileIcon, FileText, GraduationCap, Lock, Trash2, Unlock, Upload, Video } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -15,7 +14,10 @@ import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
 async function LessonDetailContent({ lessonId }: { lessonId: string }) {
+    console.debug("Fetching lesson details for ID:", lessonId)
     const result = await getLessonById(lessonId)
+
+    console.log("Lesson Detail Result:", result)
 
     if (!result.success || !result.data) {
         notFound()

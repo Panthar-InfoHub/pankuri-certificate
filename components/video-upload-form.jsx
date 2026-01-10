@@ -1,20 +1,20 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
+import { Progress } from "@/components/ui/progress"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { completeMultipartUpload, createMultipartUpload, generatePresignedUrlForImage, generatePresignedUrls } from "@/lib/action"
-import axios from "axios"
 import { createVideo } from "@/lib/backend_actions/videos"
-import { Field } from "./ui/field"
-import { useRouter } from "next/navigation"
 import { determineQuality, formatDuration, getVideoMetadata } from "@/lib/utils"
+import { useForm } from "@tanstack/react-form"
+import axios from "axios"
+import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
+import { toast } from "sonner"
+import { VideoDescriptionSection } from "./video-upload/video-description-section"
 
 const CHUNK_SIZE = 10 * 1024 * 1024 // 10 mb 
 
@@ -35,6 +35,7 @@ export function VideoUploadForm({ onSuccess }) {
             isShort: false,
             video: null,
             duration: "",
+            videoDescription: null,
         },
         onSubmit: async ({ value }) => {
             console.log("value", value)
@@ -134,6 +135,40 @@ export function VideoUploadForm({ onSuccess }) {
                     toast.success("\nUpload complete!")
                     setUploadStatus("success")
 
+                    // Upload product images if any
+                    let videoDescriptionWithUrls = value.videoDescription
+                    if (value.videoDescription?.products?.length > 0) {
+
+                        console.debug("Products with images found, uploading images... ==> ", value.videoDescription.products)
+                        toast.info("Uploading product images...")
+                        const productsWithUrls = await Promise.all(
+                            value.videoDescription.products.map(async (product) => {
+                                if (product.image && product.image instanceof File) {
+                                    const imageKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/product-images/${Date.now()}_${product.image.name}`
+                                    const { url } = await generatePresignedUrlForImage(bucketName, imageKey, product.image.type)
+
+                                    await axios.put(url, product.image, {
+                                        headers: {
+                                            'Content-Type': product.image.type,
+                                            'x-amz-acl': 'public-read'
+                                        }
+                                    })
+
+                                    const publicImageUrl = `https://${bucketName}.blr1.digitaloceanspaces.com/${imageKey}`
+                                    return { ...product, image: publicImageUrl }
+                                }
+                                return product
+                            })
+                        )
+
+                        console.debug("Products with uploaded image URLs: ", productsWithUrls)
+
+                        videoDescriptionWithUrls = {
+                            ...value.videoDescription,
+                            products: productsWithUrls
+                        }
+                    }
+
                     console.log("\nUpdating backend with video details...")
                     await createVideo({
                         title: value.title,
@@ -146,6 +181,7 @@ export function VideoUploadForm({ onSuccess }) {
                         duration: parseInt(value.duration, 10) || 0,
                         status: "processing",
                         quality: parseInt(value.videoQuality, 10) || 0,
+                        videoDescription: videoDescriptionWithUrls || null,
                     });
 
                     // Reset after a delay
@@ -206,7 +242,7 @@ export function VideoUploadForm({ onSuccess }) {
                 e.stopPropagation()
                 form.handleSubmit()
             }}
-            className="space-y-6 my-4 px-2"
+            className="space-y-6 pb-4"
         >
             {/* Video title Field */}
             <form.Field
@@ -287,8 +323,8 @@ export function VideoUploadForm({ onSuccess }) {
                 )}
             />
 
-            {/* Video Quality Select Field */}
-            <Field orientation="horizontal">
+            {/* Video Quality and Type */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <form.Field
                     name="videoQuality"
                     children={(field) => (
@@ -309,7 +345,7 @@ export function VideoUploadForm({ onSuccess }) {
                                     <SelectItem value="1080">1080p (Full HD)</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <p className="text-xs text-muted-foreground">Choose the output quality for your uploaded video</p>
+                            <p className="text-xs text-muted-foreground">Output quality</p>
                         </div>
                     )}
                 />
@@ -332,12 +368,30 @@ export function VideoUploadForm({ onSuccess }) {
                                     <SelectItem value="false">Long</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <p className="text-xs text-muted-foreground">Choose the video type for your uploaded video</p>
+                            <p className="text-xs text-muted-foreground">Video type</p>
                         </div>
                     )}
                 />
 
-            </Field>
+                {/* Duration Field */}
+                <form.Field
+                    name="duration"
+                    children={(field) => (
+                        <div className="space-y-2">
+                            <Label htmlFor="duration">Duration</Label>
+                            <Input
+                                id="duration"
+                                type="text"
+                                placeholder="e.g., 5:30"
+                                value={field.state.value}
+                                onChange={handleDurationChange}
+                                disabled={isPending}
+                            />
+                            <p className="text-xs text-muted-foreground">MM:SS or seconds</p>
+                        </div>
+                    )}
+                />
+            </div>
 
 
             {/* Upload Progress Section */}
@@ -395,22 +449,15 @@ export function VideoUploadForm({ onSuccess }) {
 
 
 
-            {/* Duration Field */}
+            {/* Video Description Section */}
             <form.Field
-                name="duration"
+                name="videoDescription"
                 children={(field) => (
-                    <div className="space-y-2">
-                        <Label htmlFor="duration">Duration</Label>
-                        <Input
-                            id="duration"
-                            type="text"
-                            placeholder="e.g., 5:30 or 330 seconds"
-                            value={field.state.value}
-                            onChange={handleDurationChange}
-                            disabled={isPending}
-                        />
-                        <p className="text-xs text-muted-foreground">Enter the video duration (format: MM:SS or total seconds)</p>
-                    </div>
+                    <VideoDescriptionSection
+                        value={field.state.value}
+                        onChange={(value) => form.setFieldValue("videoDescription", value)}
+                        disabled={isPending}
+                    />
                 )}
             />
 

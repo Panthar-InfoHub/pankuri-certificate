@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { updateUserRole } from "@/lib/backend_actions/users"
-import { MoreHorizontal, Shield, Mail, Calendar } from "lucide-react"
+import { MoreHorizontal, Shield, Mail, Calendar, Crown } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
@@ -100,7 +100,7 @@ export function UsersTable({ users, pagination }: UserTableProps) {
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant={user.role === "admin" ? "default" : user.trainerProfile ? "secondary" : "outline"} className="capitalize">
-                                        {user.role === "admin" && <Shield className="h-3 w-3 mr-1" />}
+                                        {user.role === "admin" && <Crown className="h-3 w-3 mr-1" />}
                                         {user.role === "admin" ? "Admin" : user.trainerProfile ? "Trainer" : "User"}
                                     </Badge>
                                 </TableCell>
@@ -134,7 +134,7 @@ export function UsersTable({ users, pagination }: UserTableProps) {
                                                 onClick={() => handleMakeAdmin(user.id, user.role)}
                                             // disabled={user.role === "admin"}
                                             >
-                                                <Shield className="mr-2 h-4 w-4" />
+                                                <Crown className="mr-2 h-4 w-4" />
                                                 {user.role === "admin" ? "Remove Admin" : "Make Admin"}
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
