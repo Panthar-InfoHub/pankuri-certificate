@@ -463,7 +463,7 @@ export function VideoUploadForm({ onSuccess }) {
 
             {/* Submit Button */}
             <div className="flex justify-end gap-2 pt-4">
-                <Button type="submit" disabled={isPending} className="min-w-[120px]">
+                <Button type="submit" disabled={isPending} variant="gradient" className="min-w-[120px]">
                     {isPending ? "Uploading..." : "Upload Video"}
                 </Button>
             </div>

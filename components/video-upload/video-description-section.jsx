@@ -112,7 +112,7 @@ export function VideoDescriptionSection({ value, onChange, disabled }) {
                     </div>
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="gradient"
                         size="sm"
                         onClick={addProduct}
                         disabled={disabled}
@@ -184,7 +184,7 @@ export function VideoDescriptionSection({ value, onChange, disabled }) {
                     </div>
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="gradient"
                         size="sm"
                         onClick={addTimestamp}
                         disabled={disabled}

@@ -9,7 +9,7 @@ export const proxy = auth(async (req) => {
     console.log("Middleware auth check ==> ", { isLoggedIn, pathname })
 
     // 2. Define your protected routes here
-    const protectedRoutes = ["", "/dcf"]
+    const protectedRoutes = ["/video-upload", "/dcf"]
     const isProtected = protectedRoutes.find((route) => pathname.startsWith(route))
 
     // 3. Logic: If protected & no token, redirect. Otherwise, forward.
