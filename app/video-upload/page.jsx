@@ -14,8 +14,8 @@ const page = async () => {
     // console.log("Video upload page getAllVideos ==> ", res)
 
     return (
-        <main className="min-h-screen p-4 sm:p-6 md:p-8 mt-24 ">
-            <div className="container mx-auto max-w-7xl space-y-6">
+        <main className="min-h-screen">
+            <div className="container mx-auto px-6 py-24">
 
                 <div className="flex justify-between items-center mb-6">
                     <div>

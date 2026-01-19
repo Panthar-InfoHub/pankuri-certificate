@@ -1,30 +1,22 @@
 "use client"
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-// import { uploadImageToFirebase } from "@/lib/utils"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useForm } from "@tanstack/react-form"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import z from "zod"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Loader2, X } from "lucide-react"
+import { Loader2, X, CircleDollarSign, CreditCard } from "lucide-react"
 import { createCategory } from "@/lib/backend_actions/category"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { generatePresignedUrlForImage } from "@/lib/action"
 import axios from "axios"
+import { Switch } from "../ui/switch"
 
 const categorySchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters"),
@@ -32,6 +24,10 @@ const categorySchema = z.object({
     slug: z.string().min(1, "Slug is required"),
     icon: z.string(),
     parentId: z.string(),
+    hasPricing: z.boolean().default(false),
+    price: z.number().optional(),
+    discountedPrice: z.number().optional(),
+    type: z.string().optional(),
     sequence: z.number().int().nonnegative(),
 })
 
@@ -52,6 +48,10 @@ export function CreateCategoryDialog({
             slug: "",
             icon: "",
             parentId: "",
+            hasPricing: false,
+            price: 0,
+            discountedPrice: 0,
+            type: "",
             sequence: 1,
         },
         validators: {
@@ -139,22 +139,32 @@ export function CreateCategoryDialog({
         // if (fileInput) fileInput.value = ""
     }
 
+    const handleTitleChange = (value) => {
+        const slug = value
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .trim()
+        form.setFieldValue("slug", slug)
+    }
+
     return (
         <Dialog>
             <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[720px]">
                 <DialogHeader>
                     <DialogTitle>Create New Category</DialogTitle>
                     <DialogDescription>Add a new category to your system</DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="h-96 w-full pr-4">
+                <ScrollArea className="h-96 w-full">
                     <form
                         onSubmit={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
                             form.handleSubmit()
                         }}
-                        className="space-y-4"
+                        className="space-y-4 px-2"
                     >
                         <form.Field
                             name="name"
@@ -166,6 +176,29 @@ export function CreateCategoryDialog({
                                     <Input
                                         id="name"
                                         placeholder="Enter category name"
+                                        disabled={isPending}
+                                        value={field.state.value}
+                                        onChange={(e) => {
+                                            field.handleChange(e.target.value)
+                                            handleTitleChange(e.target.value)
+                                        }}
+                                        onBlur={field.handleBlur}
+                                    />
+                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
+                            )}
+                        />
+
+                        <form.Field
+                            name="slug"
+                            children={(field) => (
+                                <Field>
+                                    <FieldLabel htmlFor="slug" className="text-sm font-medium">
+                                        Slug *
+                                    </FieldLabel>
+                                    <Input
+                                        id="slug"
+                                        placeholder="category-slug"
                                         disabled={isPending}
                                         value={field.state.value}
                                         onChange={(e) => field.handleChange(e.target.value)}
@@ -197,25 +230,111 @@ export function CreateCategoryDialog({
                             )}
                         />
 
-                        <form.Field
-                            name="slug"
-                            children={(field) => (
-                                <Field>
-                                    <FieldLabel htmlFor="slug" className="text-sm font-medium">
-                                        Slug *
-                                    </FieldLabel>
-                                    <Input
-                                        id="slug"
-                                        placeholder="category-slug"
-                                        disabled={isPending}
-                                        value={field.state.value}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                        onBlur={field.handleBlur}
-                                    />
-                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                </Field>
-                            )}
-                        />
+
+                        <div className="p-4 rounded-xl border border-dashed bg-muted/40 transition-all duration-300 hover:bg-muted/60">
+                            <form.Field
+                                name="hasPricing"
+                                children={(field) => (
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="space-y-0.5">
+                                            <FieldLabel htmlFor={field.name} className="text-base font-semibold flex items-center gap-2">
+                                                Category Specific Pricing
+                                            </FieldLabel>
+                                            <FieldDescription>
+                                                Enable if this category requires a separate subscription or purchase.
+                                            </FieldDescription>
+                                        </div>
+                                        <Switch
+                                            id={field.name}
+                                            checked={field.state.value}
+                                            onCheckedChange={(checked) => field.handleChange(checked)}
+                                        />
+                                    </div>
+                                )}
+                            />
+
+
+                            <form.Subscribe selector={(state) => state.values.hasPricing}
+                                children={(hasPricing) => (
+                                    hasPricing ? (
+                                        <div className="mt-6 pt-6 border-t border-dashed grid gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                                <form.Field
+                                                    name="price"
+                                                    children={(field) => (
+                                                        <Field className="flex flex-col gap-2">
+                                                            <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                Base Price (₹) *
+                                                            </FieldLabel>
+                                                            <Input
+                                                                id={field.name}
+                                                                value={field.state.value}
+                                                                disabled={isPending}
+                                                                type="number"
+                                                                min="0"
+                                                                onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                placeholder="0.00"
+                                                                className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                            />
+                                                            <FieldDescription className="text-[10px]">
+                                                                Original price before discount
+                                                            </FieldDescription>
+                                                            {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                        </Field>
+                                                    )}
+                                                />
+
+                                                <form.Field
+                                                    name="discountedPrice"
+                                                    children={(field) => (
+                                                        <Field className="flex flex-col gap-2">
+                                                            <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                Discounted Price (₹)
+                                                            </FieldLabel>
+                                                            <Input
+                                                                id={field.name}
+                                                                type="number"
+                                                                min="0"
+                                                                value={field.state.value}
+                                                                onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                placeholder="0.00"
+                                                                className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                            />
+                                                            <FieldDescription className="text-[10px]">
+                                                                Final price users will pay
+                                                            </FieldDescription>
+                                                            {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                        </Field>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <form.Field
+                                                name="type"
+                                                children={(field) => (
+                                                    <Field className="flex flex-col gap-2">
+                                                        <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80 flex items-center gap-2">
+                                                            <CreditCard className="w-4 h-4 text-muted-foreground" />
+                                                            Subscription Billing Cycle
+                                                        </FieldLabel>
+                                                        <Select disabled={isPending} value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
+                                                            <SelectTrigger className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1">
+                                                                <SelectValue placeholder="Select billing frequency" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="monthly" className="cursor-pointer">Monthly Billing</SelectItem>
+                                                                <SelectItem value="yearly" className="cursor-pointer">Yearly Billing</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        </div>
+                                    ) : null
+                                )}
+                            />
+                        </div>
 
                         <form.Field
                             name="parentId"
@@ -319,7 +438,7 @@ export function CreateCategoryDialog({
                                 </Button>
                             </DialogClose>
 
-                            <Button type="submit" disabled={isPending} className="flex-1">
+                            <Button type="submit" variant="gradient" disabled={isPending} className="flex-1">
                                 {isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

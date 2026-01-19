@@ -10,7 +10,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -21,12 +21,13 @@ import { handleImageChange } from "@/lib/utils"
 import { useForm } from "@tanstack/react-form"
 import axios from "axios"
 import { VideoCombobox } from "./video-combobox"
-import { Loader2, X } from "lucide-react"
+import { Loader2, X, CircleDollarSign } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import z from "zod"
+import { Switch } from "../ui/switch"
 
 const courseSchema = z.object({
     title: z.string().min(3, "Title must be at least 3 characters"),
@@ -34,6 +35,9 @@ const courseSchema = z.object({
     description: z.string().optional(),
     thumbnailImage: z.string().optional(),
     coverImage: z.string().optional(),
+    hasPricing: z.boolean().default(false),
+    price: z.number().optional(),
+    discountedPrice: z.number().optional(),
     categoryId: z.string().min(1, "Category is required"),
     trainerId: z.string().min(1, "Trainer is required"),
     level: z.enum(["beginner", "intermediate", "advanced", "expert"]),
@@ -65,6 +69,9 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
             level: "beginner",
             duration: 0,
             language: "en",
+            hasPricing: false,
+            price: 0,
+            discountedPrice: 0,
             hasCertificate: false,
             tags: [],
             demoVideoId: "",
@@ -236,6 +243,90 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                             )}
                         />
 
+                        <div className="p-4 rounded-xl border border-dashed bg-muted/40 transition-all duration-300 hover:bg-muted/60">
+                            <form.Field
+                                name="hasPricing"
+                                children={(field) => (
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="space-y-0.5">
+                                            <FieldLabel htmlFor={field.name} className="text-base font-semibold flex items-center gap-2">
+                                                <CircleDollarSign className="w-4 h-4 text-primary" />
+                                                Course Pricing
+                                            </FieldLabel>
+                                            <FieldDescription>
+                                                Does this course have a specific price?
+                                            </FieldDescription>
+                                        </div>
+                                        <Switch
+                                            id={field.name}
+                                            checked={field.state.value}
+                                            onCheckedChange={(checked) => field.handleChange(checked)}
+                                        />
+                                    </div>
+                                )}
+                            />
+
+
+                            <form.Subscribe selector={(state) => state.values.hasPricing}
+                                children={(hasPricing) => (
+                                    hasPricing ? (
+                                        <div className="mt-6 pt-6 border-t border-dashed grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            {/* Insert price and discounted price */}
+                                            <form.Field
+                                                name="price"
+                                                children={(field) => (
+                                                    <Field className="flex flex-col gap-2">
+                                                        <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                            Base Price (₹) *
+                                                        </FieldLabel>
+                                                        <Input
+                                                            id={field.name}
+                                                            value={field.state.value}
+                                                            disabled={isPending}
+                                                            type="number"
+                                                            min="0"
+                                                            onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                            placeholder="0.00"
+                                                            className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                        />
+                                                        <FieldDescription className="text-[10px]">
+                                                            Original price before discount
+                                                        </FieldDescription>
+                                                        {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                    </Field>
+                                                )}
+                                            />
+
+                                            {/* Discounted Price */}
+                                            <form.Field
+                                                name="discountedPrice"
+                                                children={(field) => (
+                                                    <Field className="flex flex-col gap-2">
+                                                        <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                            Discounted Price (₹)
+                                                        </FieldLabel>
+                                                        <Input
+                                                            id={field.name}
+                                                            type="number"
+                                                            min="0"
+                                                            value={field.state.value}
+                                                            onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                            placeholder="0.00"
+                                                            className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                        />
+                                                        <FieldDescription className="text-[10px]">
+                                                            Final price users will pay
+                                                        </FieldDescription>
+                                                        {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                    </Field>
+                                                )}
+                                            />
+                                        </div>
+                                    ) : null
+                                )}
+                            />
+                        </div>
+
                         <form.Field
                             name="categoryId"
                             children={(field) => (
@@ -273,7 +364,7 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {trainers.map((trainer) => (
-                                                <SelectItem key={trainer.user.id} value={trainer.user.id}>
+                                                <SelectItem key={trainer.id} value={trainer.id}>
                                                     {trainer.user.displayName}
                                                 </SelectItem>
                                             ))}
@@ -479,6 +570,6 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                     </form>
                 </ScrollArea>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }

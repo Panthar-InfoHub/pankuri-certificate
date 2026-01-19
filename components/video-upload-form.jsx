@@ -169,6 +169,8 @@ export function VideoUploadForm({ onSuccess }) {
                         }
                     }
 
+                    console.log("\nFinal video description with URLs: ", videoDescriptionWithUrls)
+
                     console.log("\nUpdating backend with video details...")
                     await createVideo({
                         title: value.title,

@@ -1,22 +1,31 @@
-import { Suspense } from "react"
+import { CourseFilter } from "@/components/course/course-filter"
 import { CoursesTable } from "@/components/course/courses-table"
 import { CreateCourseDialog } from "@/components/course/create-course-dialog"
 import { Button } from "@/components/ui/button"
-import { TableSkeleton, PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
-import { getAllCourses } from "@/lib/backend_actions/course"
+import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
 import { getFlatCategories } from "@/lib/backend_actions/category"
-import { Plus } from "lucide-react"
+import { getAllCourses } from "@/lib/backend_actions/course"
 import { getAllTrainersAdmin } from "@/lib/backend_actions/trainer"
+import { Plus } from "lucide-react"
+import { Suspense } from "react"
 
-async function CoursesContent() {
+async function CoursesContent({ searchP }) {
+
   const [coursesResult, categoriesResult, trainersResult] = await Promise.all([
-    getAllCourses({ limit: 100, status: "active" }),
+    getAllCourses({
+      limit: searchP.limit || 100,
+      status: searchP.status || "active",
+      categoryId: searchP.category || undefined,
+      level: searchP.level || undefined,
+      search: searchP.search || undefined,
+      page: searchP.page || 1,
+    }),
     getFlatCategories({ limit: 100, status: "active" }),
     getAllTrainersAdmin()
   ])
 
   const courses = coursesResult.success ? coursesResult.data : []
-  const categories = categoriesResult.success ? categoriesResult.data : []
+  const categories = categoriesResult.success ? categoriesResult.data.data : []
   const trainers = trainersResult.success ? trainersResult.data : []
 
 
@@ -35,16 +44,19 @@ async function CoursesContent() {
         </CreateCourseDialog>
       </div>
 
-      <CoursesTable courses={courses} categories={categories} />
+      <CourseFilter categories={categories} />
+
+      <CoursesTable courses={courses} categories={categories} pagination={coursesResult.success && coursesResult.pagination} />
     </>
   )
 }
 
-export default function CoursesPage() {
+export default async function CoursesPage({ searchParams }) {
+  const searchP = await searchParams
   return (
     <div className="container mx-auto px-6 py-24">
       <Suspense fallback={<PageHeaderSkeleton />}>
-        <CoursesContent />
+        <CoursesContent searchP={searchP} />
       </Suspense>
     </div>
   )

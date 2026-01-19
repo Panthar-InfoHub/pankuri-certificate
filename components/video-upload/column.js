@@ -12,6 +12,7 @@ import {
 import { Play, Download, Trash2, MoreHorizontal, Edit } from "lucide-react"
 import Image from "next/image"
 import { DeleteVideoDialog } from "./delete-video-dialog"
+import { EditVideoDialog } from "./edit-video-dialog"
 import { toast } from "sonner"
 import { useState } from "react"
 import { VideoPlayer } from "./VideoPlayer"
@@ -40,13 +41,18 @@ export const videoColumns = [
         accessorKey: "duration",
         header: "Duration",
         cell: ({ row }) => {
-           return formatDuration(row.original.duration)
+            return formatDuration(row.original.duration)
         },
     },
     {
         accessorKey: "quality",
         header: "Quality",
         cell: ({ row }) => <Badge variant="secondary">{row.original.metadata.quality}</Badge>,
+    },
+    {
+        accessorKey: "Status",
+        header: "Status",
+        cell: ({ row }) => <Badge variant="default">{row.original.status}</Badge>,
     },
     {
         accessorKey: "uploadedAt",
@@ -101,14 +107,12 @@ export const videoColumns = [
                                 <Play className="w-4 h-4 mr-2" />
                                 Play
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => {
-                                    console.log("Edit:", row.original.id)
-                                }}
-                            >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Edit
-                            </DropdownMenuItem>
+                            <EditVideoDialog video={row.original}>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Edit
+                                </DropdownMenuItem>
+                            </EditVideoDialog>
                             <DropdownMenuItem onClick={handleDownload}>
                                 <Download className="w-4 h-4 mr-2" />
                                 Download

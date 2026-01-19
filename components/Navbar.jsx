@@ -1,5 +1,5 @@
 "use client"
-import { BookCheck, ContactRound, Crown, GraduationCap, Menu, Tv, X } from "lucide-react"
+import { BookCheck, Boxes, ContactRound, Crown, GraduationCap, IndianRupee, LayoutDashboard, Menu, Tv, X } from "lucide-react"
 
 import UserMenu from "@/components/navbar-components/user-menu"
 import { Button } from "@/components/ui/button"
@@ -43,6 +43,13 @@ const navigationLinks = [
       { href: "/user", label: "Admin Management", icon: Crown, description: "Manage admins" },
     ]
   },
+  {
+    href: "/#", label: "Plan", icon: IndianRupee,
+    children: [
+      { href: "/plan/category", label: "Category Plan", icon: LayoutDashboard, description: "Manage categories" },
+      { href: "/plan/app", label: "App Plan", icon: Boxes, description: "Manage whole app plans" },
+    ]
+  },
 
 ]
 
@@ -54,7 +61,7 @@ export default function Component() {
     <header className="fixed z-50 top-0 inset-x-0 border-b bg-gradient-to-r from-purple-50/50 via-pink-50/30 to-transparent backdrop-blur-sm px-4 md:px-6 shadow-lg shadow-purple-500/10">
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Left side */}
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 items-center gap-2 ">
           {/* Mobile Navigation */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -132,7 +139,7 @@ export default function Component() {
             </SheetContent>
           </Sheet>
 
-          <NavigationMenu className="max-md:hidden">
+          <NavigationMenu viewport={false} className="max-md:hidden">
             <NavigationMenuList className="gap-2">
               {navigationLinks.map((link, index) => {
                 const Icon = link.icon
@@ -140,14 +147,14 @@ export default function Component() {
                 return (
                   link.children ?
                     <NavigationMenuItem key={index} >
-                      <NavigationMenuTrigger className={`flex-row bg-transparent items-center gap-2 py-2 px-4 font-medium rounded-lg transition-all duration-200 ${isActive
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                        : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 "
+                      <NavigationMenuTrigger className={`flex-row bg-transparent items-center gap-2 py-2 px-4 font-medium rounded-lg transition-all duration-200 relative ${isActive
+                        ? "bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                        : "text-foreground hover:bg-linear-to-r hover:from-purple-100 hover:to-pink-100 "
                         }`} >
                         <Icon size={16} className={isActive ? "text-white" : "text-muted-foreground/80"} aria-hidden="true" />
                         <span className={`font-medium ${isActive ? "text-white" : ""}`}>{link.label}</span>
                       </NavigationMenuTrigger>
-                      <NavigationMenuContent>
+                      <NavigationMenuContent >
                         <ul className="grid gap-2 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                           {link.children.map((component, i) => {
                             const ChildIcon = component.icon
@@ -183,8 +190,8 @@ export default function Component() {
                         active={isActive}
                         href={link.href}
                         className={`flex-row items-center gap-2 py-2 px-4 font-medium rounded-lg transition-all duration-200 ${isActive
-                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                          : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 "
+                          ? "bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                          : "text-foreground hover:bg-linear-to-r hover:from-purple-100 hover:to-pink-100 "
                           }`}>
                         <Icon size={16} className={isActive ? "text-white" : "text-muted-foreground/80"} aria-hidden="true" />
                         <span className={isActive ? "text-white" : ""}>{link.label}</span>
@@ -198,7 +205,7 @@ export default function Component() {
 
 
         {/* Right side: Actions */}
-        <div className="flex flex-1 items-center justify-end gap-4">
+        <div className="flex tems-center justify-end gap-4">
           {/* User menu */}
           <SessionProvider>
             <UserMenu />

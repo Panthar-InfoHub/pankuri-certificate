@@ -74,7 +74,7 @@ export default function ModulesTable({ modules, courses, selectedCourseId }) {
     return (
         <>
             <Card className="mb-6">
-                <CardContent className="pt-6">
+                <CardContent>
                     <div className="flex items-center gap-4">
                         <div className="flex-1">
                             <label className="text-sm font-medium mb-2 block">Filter by Course</label>
@@ -99,8 +99,8 @@ export default function ModulesTable({ modules, courses, selectedCourseId }) {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardContent className="p-0">
+            <Card className="pt-0!" >
+                <CardContent className="px-2">
                     <Table>
                         <TableHeader>
                             <TableRow>

@@ -1,17 +1,16 @@
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Toaster } from "react-hot-toast" // Import Toaster for notifications
-import { Toaster as Sonner } from "@/components/ui/sonner"
 import Component from "@/components/Navbar"
-import { SessionProvider } from "next-auth/react"
+import { Toaster as Sonner } from "@/components/ui/sonner"
+import { Inter } from "next/font/google"
+import { Toaster } from "react-hot-toast"; // Import Toaster for notifications
+import "./globals.css"
 
 
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Acadma Uploader",
-  description: "Upload and Manager Content",
+  title: "Pankhuri Dashboard",
+  description: "Manage your Pankhuri Content Platform with ease.",
 }
 
 export default function RootLayout({ children }) {

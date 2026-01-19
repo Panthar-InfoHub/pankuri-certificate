@@ -11,7 +11,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Eye, EyeOff, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { Eye, EyeOff, Lock, MoreHorizontal, Pencil, Trash2, Unlock } from "lucide-react"
 // import { deleteCategory, updateCategoryStatus } from "@/lib/category-actions"
 import { deleteCategory, updateCategoryStatus } from "@/lib/backend_actions/category"
 import Image from "next/image"
@@ -20,9 +20,10 @@ import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import { DeleteCategoryDialog } from "./delete-category-dialog"
 import { EditCategoryDialog } from "./edit-category-dialog"
+import PaginationNumberless from "../customized/pagination/pagination-12"
 
 
-export function CategoriesTable({ categories, parentCategories }) {
+export function CategoriesTable({ categories, parentCategories, pagination }) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [editingCategory, setEditingCategory] = useState(null)
@@ -60,7 +61,8 @@ export function CategoriesTable({ categories, parentCategories }) {
                             <TableHead>Description</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Sequence</TableHead>
-                            <TableHead className="w-[80px]">Actions</TableHead>
+                            <TableHead>Paid</TableHead>
+                            <TableHead className="w-20">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -89,6 +91,11 @@ export function CategoriesTable({ categories, parentCategories }) {
                                     <Badge variant={category.status === "active" ? "default" : "secondary"}>{category.status}</Badge>
                                 </TableCell>
                                 <TableCell>{category.sequence}</TableCell>
+                                <TableCell>
+                                    <Badge variant={category.isPaid ? "default" : "secondary"} className="p-2" >
+                                        {category.isPaid ? <Lock /> : <Unlock />}
+                                    </Badge>
+                                </TableCell>
                                 <TableCell>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -138,7 +145,7 @@ export function CategoriesTable({ categories, parentCategories }) {
                     </TableBody>
                 </Table>
             </div>
-
+            <PaginationNumberless pagination={pagination} redirectTo="category" />
         </>
     )
 }

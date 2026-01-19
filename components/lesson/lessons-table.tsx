@@ -97,7 +97,7 @@ export default function LessonsTable({ lessons, courses, modules = [], selectedC
     return (
         <>
             <Card className="mb-6">
-                <CardContent className="pt-6">
+                <CardContent>
                     <div className="flex items-center gap-4">
                         <div className="flex-1">
                             <label className="text-sm font-medium mb-2 block">Filter by Course</label>
