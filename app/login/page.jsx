@@ -21,7 +21,7 @@ export default function LoginPage() {
       </div>
       <div className="bg-muted relative hidden lg:block">
         <img
-          src="https://c4.wallpaperflare.com/wallpaper/38/503/617/xiao-genshin-impact-genshin-impact-hd-wallpaper-preview.jpg"
+          src="login_banner.svg"
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />

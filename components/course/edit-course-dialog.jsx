@@ -19,7 +19,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Loader2, X } from "lucide-react"
+import { Loader2, Pencil, X } from "lucide-react"
 import { updateCourse } from "@/lib/backend_actions/course"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -186,7 +186,12 @@ export function EditCourseDialog({ course, categories, children }) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogTrigger asChild>
+                <Button variant="gradient">
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit Course
+                </Button>
+            </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                     <DialogTitle>Edit Course</DialogTitle>
