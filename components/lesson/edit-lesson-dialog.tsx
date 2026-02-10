@@ -33,7 +33,7 @@ import { VideoCombobox } from "@/components/course/video-combobox"
 
 const lessonSchema = z.object({
     courseId: z.string().min(1, "Course is required"),
-    moduleId: z.string().optional(),
+    moduleId: z.string().min(1, "Module is required"),
     title: z.string().min(3, "Title must be at least 3 characters"),
     slug: z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug must be lowercase with hyphens only"),
     type: z.enum(["video", "text"]),
@@ -42,16 +42,26 @@ const lessonSchema = z.object({
     duration: z.number().int().min(0).optional(),
     isFree: z.boolean(),
     isMandatory: z.boolean(),
-    status: z.enum(["draft", "published", "archived"]),
+    status: z.enum(["draft", "published", "archived", "scheduled"]),
+    scheduledAt: z.string().optional(),
     // Video lesson fields
     videoId: z.string().optional(),
     // Text lesson fields
     textContent: z.string().optional(),
     estimatedReadTime: z.number().int().min(0).optional(),
+}).refine((data) => {
+    if (data.status === "scheduled" && !data.scheduledAt) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Scheduled time is required for scheduled status",
+    path: ["scheduledAt"]
 })
 interface EditDialogProps {
     lesson: z.infer<typeof lessonSchema> & {
         id: string
+        scheduledAt?: string
         videoLesson?: { videoId?: string }
         textLesson?: { content?: string, estimatedReadTime?: number }
     }
@@ -98,7 +108,8 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
             duration: lesson.duration || 0,
             isFree: lesson.isFree || false,
             isMandatory: lesson.isMandatory !== undefined ? lesson.isMandatory : true,
-            status: lesson.status || "draft" as "draft" | "published" | "archived",
+            status: lesson.status || "draft" as "draft" | "published" | "archived" | "scheduled",
+            scheduledAt: lesson.scheduledAt ? lesson.scheduledAt.substring(0, 16) : "",
             videoId: lesson.videoLesson?.videoId || "",
             textContent: lesson.textLesson?.content || "",
             estimatedReadTime: lesson.textLesson?.estimatedReadTime || 0,
@@ -109,11 +120,21 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
         onSubmit: async ({ value }) => {
             setIsSubmitting(true)
             try {
+                // Format scheduledAt to include IST timezone offset if it exists
+                let formattedScheduledAt = value.scheduledAt;
+                if (value.status === "scheduled" && value.scheduledAt) {
+                    // If it doesn't already have a timezone, append IST (+05:30)
+                    if (!value.scheduledAt.includes("+") && !value.scheduledAt.includes("Z")) {
+                        formattedScheduledAt = `${value.scheduledAt}:00+05:30`;
+                    }
+                }
+
                 const payload = {
                     ...value,
                     moduleId: value.moduleId || null,
                     duration: value.duration || undefined,
                     description: value.description || undefined,
+                    scheduledAt: value.status === "scheduled" ? formattedScheduledAt : undefined,
                     videoId: value.type === "video" ? value.videoId || undefined : undefined,
                     textContent: value.type === "text" ? value.textContent || undefined : undefined,
                     estimatedReadTime: value.type === "text" ? value.estimatedReadTime || undefined : undefined,
@@ -205,12 +226,11 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
                         )}
                     />
 
-                    {/* Module Selection (Optional) */}
                     <form.Field
                         name="moduleId"
                         children={(field) => (
                             <Field className="space-y-2">
-                                <FieldLabel htmlFor={field.name}>Module (Optional)</FieldLabel>
+                                <FieldLabel htmlFor={field.name}>Module *</FieldLabel>
                                 <Select
                                     value={field.state.value}
                                     onValueChange={(value) => field.handleChange(value)}
@@ -220,7 +240,7 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
                                         <SelectValue placeholder={
                                             loadingModules ? "Loading modules..." :
                                                 modules.length === 0 ? "No modules available" :
-                                                    "Select a module (optional)"
+                                                    "Select a module"
                                         } />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -234,7 +254,7 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
                                 <p className="text-xs text-muted-foreground">
                                     {!form.state.values.courseId ? "Select a course first" :
                                         modules.length === 0 ? "This course has no modules" :
-                                            "Lessons can belong to a specific module within the course"}
+                                            "Lessons must belong to a specific module within the course"}
                                 </p>
                                 {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
                             </Field>
@@ -412,7 +432,7 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
                                     <FieldLabel htmlFor={field.name}>Status *</FieldLabel>
                                     <Select
                                         value={field.state.value}
-                                        onValueChange={(value: 'draft' | 'published' | 'archived') => field.handleChange(value)}
+                                        onValueChange={(value: 'draft' | 'published' | 'archived' | 'scheduled') => field.handleChange(value)}
                                     >
                                         <SelectTrigger>
                                             <SelectValue />
@@ -420,6 +440,7 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
                                         <SelectContent>
                                             <SelectItem value="draft">Draft</SelectItem>
                                             <SelectItem value="published">Published</SelectItem>
+                                            <SelectItem value="scheduled">Scheduled</SelectItem>
                                             <SelectItem value="archived">Archived</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -428,6 +449,33 @@ export default function EditLessonDialog({ lesson, courses, children }: EditDial
                             )}
                         />
                     </Field>
+
+                    {/* Scheduled At - Only show if status is scheduled */}
+                    <form.Subscribe
+                        selector={(state) => state.values.status}
+                        children={(status) => (
+                            status === "scheduled" && (
+                                <form.Field
+                                    name="scheduledAt"
+                                    children={(field) => (
+                                        <Field className="space-y-2">
+                                            <FieldLabel htmlFor={field.name}>Schedule At (IST) *</FieldLabel>
+                                            <Input
+                                                id={field.name}
+                                                type="datetime-local"
+                                                value={field.state.value}
+                                                onChange={(e) => field.handleChange(e.target.value)}
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Select the date and time for the lesson to go live.
+                                            </p>
+                                            {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                        </Field>
+                                    )}
+                                />
+                            )
+                        )}
+                    />
 
                     {/* Duration (optional) */}
                     <form.Field
