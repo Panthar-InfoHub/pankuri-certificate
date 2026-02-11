@@ -37,6 +37,7 @@ import DeleteLessonDialog from "./delete-lesson-dialog"
 const STATUS_BADGES = {
     draft: { variant: "secondary", label: "Draft" },
     published: { variant: "default", label: "Published" },
+    scheduled: { variant: "outline", label: "Scheduled" },
     archived: { variant: "outline", label: "Archived" },
 }
 
