@@ -24,6 +24,7 @@ export function EditVideoDialog({ video, children }) {
         defaultValues: {
             title: video.title || "",
             duration: video.duration || 0,
+            externalUrl: video.externalUrl || "",
             videoQuality: video.metadata?.quality?.toString() || "720",
             isShort: video.metadata?.isShort || false,
             videoDescription: video.videoDescription || null,
@@ -69,6 +70,7 @@ export function EditVideoDialog({ video, children }) {
                 const payload = {
                     title: value.title,
                     duration: parseInt(value.duration.toString()) || 0,
+                    externalUrl: value.externalUrl || null,
                     metadata: {
                         quality: parseInt(value.videoQuality.toString()) || 0,
                         isShort: value.isShort,
@@ -124,6 +126,22 @@ export function EditVideoDialog({ video, children }) {
                                     value={field.state.value}
                                     onChange={(e) => field.handleChange(e.target.value)}
                                     placeholder="Enter video title"
+                                />
+                            </div>
+                        )}
+                    />
+
+                    <form.Field
+                        name="externalUrl"
+                        children={(field) => (
+                            <div className="space-y-2">
+                                <Label htmlFor="externalUrl">External URL</Label>
+                                {field.state.value}
+                                <Input
+                                    id="externalUrl"
+                                    value={field.state.value}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    placeholder="Enter external URL"
                                 />
                             </div>
                         )}

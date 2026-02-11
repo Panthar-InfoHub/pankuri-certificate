@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { upsertLessonDescription } from "@/lib/backend_actions/lesson"
-import MDEditor from "@uiw/react-md-editor"
+import MDEditor, { commands } from "@uiw/react-md-editor"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -54,6 +54,19 @@ export default function LessonDescriptionDialog({ lesson, children }) {
         }
     }
 
+    const editorCommands = [
+        commands.bold,
+        commands.italic,
+        commands.strikethrough,
+        commands.divider,
+        commands.link,
+        commands.quote,
+        commands.code,
+        commands.codeBlock,
+        commands.unorderedListCommand,
+        commands.orderedListCommand,
+    ];
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{children}</DialogTrigger>
@@ -74,6 +87,7 @@ export default function LessonDescriptionDialog({ lesson, children }) {
                         <MDEditor
                             value={textContent}
                             onChange={setTextContent}
+                            commands={editorCommands}
                             textareaProps={{
                                 placeholder: `# Lesson Overview ${"\n"}This lesson covers...${"\n"}
 ## What You'll Learn
