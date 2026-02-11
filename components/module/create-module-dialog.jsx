@@ -25,14 +25,14 @@ const moduleSchema = z.object({
     status: z.enum(["draft", "published", "archived"]),
 })
 
-export default function CreateModuleDialog({ courses }) {
+export default function CreateModuleDialog({ courses, courseId }) {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const form = useForm({
         defaultValues: {
-            courseId: "",
+            courseId: courseId || "",
             title: "",
             slug: "",
             description: "",

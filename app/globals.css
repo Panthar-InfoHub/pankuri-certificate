@@ -134,10 +134,18 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -ms-overflow-style: none;
+      scrollbar-width: none;
   }
 
+    html,
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    }
+    
+    *::-webkit-scrollbar {
+      display: none;
   }
 }
 
@@ -177,4 +185,12 @@
   .border-brand-gradient {
     border-image: linear-gradient(to right, var(--brand-purple-600), var(--brand-pink-600)) 1;
   }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 }
