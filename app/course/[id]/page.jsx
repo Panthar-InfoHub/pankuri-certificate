@@ -219,9 +219,9 @@ async function CourseDetailContent({ courseId }) {
 
                         <EditCourseDialog course={course} categories={categories} />
 
-                        <CreateModuleDialog courses={courses} />
+                        <CreateModuleDialog courses={courses} courseId={courseId} />
 
-                        <CreateLessonDialog courses={courses} />
+                        <CreateLessonDialog courses={courses} courseId={courseId} />
                     </div>
                 </div>
             </div>

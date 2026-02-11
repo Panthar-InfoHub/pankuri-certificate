@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
@@ -31,6 +31,12 @@ import { getModulesByCourse } from "@/lib/backend_actions/module"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { VideoCombobox } from "@/components/course/video-combobox"
 
+import MDEditor, { commands } from "@uiw/react-md-editor";
+import "@uiw/react-md-editor/markdown-editor.css";
+
+
+
+
 const lessonSchema = z.object({
     courseId: z.string().min(1, "Course is required"),
     moduleId: z.string().min(1, "Module is required"),
@@ -59,7 +65,7 @@ const lessonSchema = z.object({
     path: ["scheduledAt"]
 })
 
-export default function CreateLessonDialog({ courses }) {
+export default function CreateLessonDialog({ courses, courseId }) {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
@@ -68,7 +74,7 @@ export default function CreateLessonDialog({ courses }) {
 
     const form = useForm({
         defaultValues: {
-            courseId: "",
+            courseId: courseId || "",
             moduleId: "",
             title: "",
             slug: "",
@@ -150,6 +156,8 @@ export default function CreateLessonDialog({ courses }) {
         }
     }
 
+
+
     // Auto-generate slug from title
     const handleTitleChange = (value: string) => {
         const slug = value
@@ -161,6 +169,40 @@ export default function CreateLessonDialog({ courses }) {
         form.setFieldValue("slug", slug)
     }
 
+    useEffect(() => {
+        if (courseId) {
+            handleCourseChange(courseId)
+        }
+    }, [courseId])
+
+
+
+    const editorCommands = [
+        commands.bold,
+        commands.italic,
+        commands.strikethrough,
+        commands.divider,
+        commands.link,
+        commands.quote,
+        commands.code,
+        commands.codeBlock,
+        commands.unorderedListCommand,
+        commands.orderedListCommand,
+    ];
+
+
+    useEffect(() => {
+        if (!open) {
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+        }
+
+        return () => {
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+        };
+    }, [open]);
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -169,7 +211,7 @@ export default function CreateLessonDialog({ courses }) {
                     Create Lesson
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-gradient-brand" >Create New Lesson</DialogTitle>
                     <DialogDescription>
@@ -295,13 +337,19 @@ export default function CreateLessonDialog({ courses }) {
                         children={(field) => (
                             <Field className="space-y-2">
                                 <FieldLabel htmlFor={field.name}>Description</FieldLabel>
-                                <Textarea
-                                    id={field.name}
-                                    value={field.state.value}
-                                    onChange={(e) => field.handleChange(e.target.value)}
-                                    placeholder="Brief description of the lesson content"
-                                    rows={3}
-                                />
+                                <div data-color-mode="light" className="rounded-md border border-input bg-background">
+                                    <MDEditor
+                                        id={field.name}
+                                        value={field.state.value}
+                                        onChange={(nextValue) => field.handleChange(nextValue || "")}
+                                        commands={editorCommands}
+                                        preview="edit"
+                                        height={220}
+                                        textareaProps={{
+                                            placeholder: "Brief description of the lesson content...",
+                                        }}
+                                    />
+                                </div>
                             </Field>
                         )}
                     />
@@ -436,13 +484,20 @@ export default function CreateLessonDialog({ courses }) {
                                             children={(field) => (
                                                 <Field className="space-y-2">
                                                     <FieldLabel htmlFor={field.name}>Text Content *</FieldLabel>
-                                                    <Textarea
-                                                        id={field.name}
-                                                        value={field.state.value}
-                                                        onChange={(e) => field.handleChange(e.target.value)}
-                                                        placeholder="Enter the lesson content here..."
-                                                        rows={8}
-                                                    />
+
+                                                    <div data-color-mode="light" className="rounded-md border border-input bg-background">
+                                                        <MDEditor
+                                                            id={field.name}
+                                                            value={field.state.value}
+                                                            onChange={(nextValue) => field.handleChange(nextValue || "")}
+                                                            commands={editorCommands}
+                                                            preview="edit"
+                                                            height={250}
+                                                            textareaProps={{
+                                                                placeholder: "Write the chapter content...",
+                                                            }}
+                                                        />
+                                                    </div>
                                                     <p className="text-xs text-muted-foreground">
                                                         Main text content for this lesson
                                                     </p>

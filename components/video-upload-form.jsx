@@ -34,6 +34,7 @@ export function VideoUploadForm({ onSuccess }) {
             videoQuality: "720",
             isShort: false,
             video: null,
+            externalUrl: "",
             duration: "",
             videoDescription: null,
         },
@@ -180,6 +181,7 @@ export function VideoUploadForm({ onSuccess }) {
                             quality: parseInt(value.videoQuality, 10) || 0,
                             isShort: value.isShort,
                         },
+                        externalUrl: value.externalUrl || null,
                         duration: parseInt(value.duration, 10) || 0,
                         status: "processing",
                         quality: parseInt(value.videoQuality, 10) || 0,
@@ -244,7 +246,7 @@ export function VideoUploadForm({ onSuccess }) {
                 e.stopPropagation()
                 form.handleSubmit()
             }}
-            className="space-y-6 pb-4"
+            className="space-y-6 pb-4 px-2"
         >
             {/* Video title Field */}
             <form.Field
@@ -321,6 +323,26 @@ export function VideoUploadForm({ onSuccess }) {
                         />
                         {field.state.value && <p className="text-sm text-muted-foreground">Selected: {field.state.value.name}</p>}
                         <p className="text-xs text-muted-foreground">Choose the video file to upload (MP4, WebM, etc.)</p>
+                    </div>
+                )}
+            />
+            {/* Video Url Field */}
+            <form.Field
+                name="externalUrl"
+                children={(field) => (
+                    <div className="space-y-2">
+                        <Label htmlFor="externalUrl">Video URL</Label>
+                        <Input
+                            id="externalUrl"
+                            type="text"
+                            value={field.state.value}
+                            placeholder="http://digitalocean...."
+                            onChange={(e) => form.setFieldValue("externalUrl", e.target.value)}
+                            disabled={isPending}
+                            className="cursor-pointer"
+                        />
+                        {field.state.value && <p className="text-sm text-muted-foreground">Entered URL: {field.state.value}</p>}
+                        <p className="text-xs text-muted-foreground">Enter the URL of the video </p>
                     </div>
                 )}
             />

@@ -1,19 +1,19 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { createModule } from "@/lib/backend_actions/module"
 import { useForm } from "@tanstack/react-form"
 import { Loader2, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Field, FieldError, FieldLabel } from "../ui/field"
+import MDEditor, { commands } from "@uiw/react-md-editor";
+import "@uiw/react-md-editor/markdown-editor.css";
 
 const moduleSchema = z.object({
     courseId: z.string().min(1, "Course is required"),
@@ -80,6 +80,30 @@ export default function CreateModuleDialog({ courses, courseId }) {
             .trim()
         form.setFieldValue("slug", slug)
     }
+    const editorCommands = [
+        commands.bold,
+        commands.italic,
+        commands.strikethrough,
+        commands.divider,
+        commands.link,
+        commands.quote,
+        commands.code,
+        commands.codeBlock,
+        commands.unorderedListCommand,
+        commands.orderedListCommand,
+    ];
+
+    useEffect(() => {
+        if (!open) {
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+        }
+
+        return () => {
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+        };
+    }, [open]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -89,7 +113,7 @@ export default function CreateModuleDialog({ courses, courseId }) {
                     Create Module
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create New Module</DialogTitle>
                     <DialogDescription>
@@ -178,13 +202,19 @@ export default function CreateModuleDialog({ courses, courseId }) {
                         children={(field) => (
                             <Field className="space-y-2">
                                 <FieldLabel htmlFor={field.name}>Description</FieldLabel>
-                                <Textarea
-                                    id={field.name}
-                                    value={field.state.value}
-                                    onChange={(e) => field.handleChange(e.target.value)}
-                                    placeholder="Brief description of what this module covers"
-                                    rows={3}
-                                />
+                                <div data-color-mode="light" className="rounded-md border border-input bg-background">
+                                    <MDEditor
+                                        id={field.name}
+                                        value={field.state.value}
+                                        onChange={(nextValue) => field.handleChange(nextValue || "")}
+                                        commands={editorCommands}
+                                        preview="edit"
+                                        height={250}
+                                        textareaProps={{
+                                            placeholder: "Brief description of what this module covers in markdown format...",
+                                        }}
+                                    />
+                                </div>
                             </Field>
                         )}
                     />

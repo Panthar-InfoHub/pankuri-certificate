@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import MDEditor from "@uiw/react-md-editor"
+import MDEditor, { commands } from "@uiw/react-md-editor"
 import { Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 
@@ -79,6 +79,19 @@ export function VideoDescriptionSection({ value, onChange, disabled }) {
         updateField("timestamps", newTimestamps)
     }
 
+    const editorCommands = [
+        commands.bold,
+        commands.italic,
+        commands.strikethrough,
+        commands.divider,
+        commands.link,
+        commands.quote,
+        commands.code,
+        commands.codeBlock,
+        commands.unorderedListCommand,
+        commands.orderedListCommand,
+    ];
+
     return (
         <div className="space-y-6">
             {/* Disclaimer Section */}
@@ -90,6 +103,7 @@ export function VideoDescriptionSection({ value, onChange, disabled }) {
                 <MDEditor
                     value={descriptionData.disclaimer || ""}
                     onChange={(val) => updateField("disclaimer", val || "")}
+                    commands={editorCommands}
                     textareaProps={{
                         placeholder: "Add any disclaimers for this video...",
                         disabled: disabled
@@ -238,6 +252,7 @@ export function VideoDescriptionSection({ value, onChange, disabled }) {
                 <MDEditor
                     value={descriptionData.description || ""}
                     onChange={(val) => updateField("description", val || "")}
+                    commands={editorCommands}
                     textareaProps={{
                         placeholder: `# About This Video\n\nDetailed description of what viewers will learn...\n\n## Key Takeaways\n- Point 1\n- Point 2\n\n**Additional Notes:**\nAny extra information...`,
                         disabled: disabled
