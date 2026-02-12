@@ -58,22 +58,24 @@ export function EditCourseDialog({ course, categories, children }) {
     const [coverFile, setCoverFile] = useState(null)
     const [uploadProgress, setUploadProgress] = useState({ thumbnail: 0, cover: 0 })
 
+    console.log("Edit course ==> ", course)
+
     const form = useForm({
         defaultValues: {
-            title: course.title,
-            slug: course.slug,
+            title: course?.title,
+            slug: course?.slug,
             description: course.description || "",
-            thumbnailImage: course.thumbnailImage || "",
-            coverImage: course.coverImage || "",
-            hasPricing: course.isPaid || false,
-            price: course.pricing.price || 0,
-            discountedPrice: course.pricing.discountedPrice || 0,
-            categoryId: course.categoryId,
-            level: course.level,
-            duration: course.duration || 0,
-            language: course.language || "en",
-            hasCertificate: course.hasCertificate || false,
-            demoVideoId: course.demoVideoId || "",
+            thumbnailImage: course?.thumbnailImage || "",
+            coverImage: course?.coverImage || "",
+            hasPricing: course?.isPaid || false,
+            price: course.pricing?.price || 0,
+            discountedPrice: course.pricing?.discountedPrice || 0,
+            categoryId: course?.categoryId,
+            level: course?.level,
+            duration: course?.duration || 0,
+            language: course?.language || "en",
+            hasCertificate: course?.hasCertificate || false,
+            demoVideoId: course?.demoVideoId || "",
         },
         validators: {
             onSubmit: courseSchema,
