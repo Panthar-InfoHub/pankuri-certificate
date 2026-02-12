@@ -17,8 +17,9 @@ import {
 import { TableSkeleton } from "@/components/ui/skeleton-loader"
 import { getAllUsers } from "@/lib/backend_actions/users"
 import { cn } from "@/lib/utils"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Scroll } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
+import { ScrollArea } from "../ui/scroll-area"
 
 export function UserCombobox({ value, onValueChange, disabled }) {
     const [open, setOpen] = useState(false)
@@ -30,7 +31,7 @@ export function UserCombobox({ value, onValueChange, disabled }) {
         setLoading(true)
         const result = await getAllUsers({ limit: 50, search: searchQuery })
         if (result.success) {
-            setUsers(result.data)
+            setUsers(result.data.data)
         }
         setLoading(false)
     }, [])
@@ -54,7 +55,7 @@ export function UserCombobox({ value, onValueChange, disabled }) {
     const selectedUser = users.find(user => user.id === value)
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
@@ -74,7 +75,8 @@ export function UserCombobox({ value, onValueChange, disabled }) {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[400px] p-0" align="start">
+
+            <PopoverContent className="w-[500px] p-0" align="start">
                 <Command shouldFilter={false}>
                     <CommandInput
                         placeholder="Search users by name or email..."
@@ -116,7 +118,8 @@ export function UserCombobox({ value, onValueChange, disabled }) {
                         )}
                     </CommandList>
                 </Command>
+
             </PopoverContent>
-        </Popover>
+        </Popover >
     )
 }
