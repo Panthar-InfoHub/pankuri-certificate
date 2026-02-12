@@ -1,8 +1,10 @@
+import CreateLessonDialog from "@/components/lesson/create-lesson-dialog"
 import { ModuleDetailTabs } from "@/components/module/module-detail-tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
+import { getAllCourses } from "@/lib/backend_actions/course"
 import { getModuleById } from "@/lib/backend_actions/module"
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Clock, GraduationCap, ListOrdered, Play, Video } from "lucide-react"
 import Link from "next/link"
@@ -10,7 +12,11 @@ import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
 async function ModuleDetailContent({ moduleId }) {
-    const result = await getModuleById(moduleId)
+
+    const [result, coursesResult] = await Promise.all([
+        getModuleById(moduleId),
+        getAllCourses({ limit: 100, status: "active" }),
+    ])
 
     if (!result.success || !result.data) {
         notFound()
@@ -21,6 +27,9 @@ async function ModuleDetailContent({ moduleId }) {
     // Count video vs text lessons
     const videoCount = module.lessons?.filter(l => l.type === "video").length || 0
     const textCount = module.lessons?.filter(l => l.type === "text").length || 0
+
+    const courses = coursesResult.success ? coursesResult.data : []
+    const courseId = module.courseId
 
     return (
         <div className="space-y-10">
@@ -34,52 +43,13 @@ async function ModuleDetailContent({ moduleId }) {
                 </Link>
 
                 {/* Prev / Next Module Navigation */}
-                {module.navigation && (
-                    <div className="flex items-center gap-2">
-                        {module.navigation.previous ? (
-                            <Link href={`/module/${module.navigation.previous}`}>
-                                <Button variant="outline" size="sm" className="gap-1.5">
-                                    <ChevronLeft className="h-4 w-4" />
-                                    Previous
-                                </Button>
-                            </Link>
-                        ) : (
-                            <Button variant="outline" size="sm" className="gap-1.5" disabled>
-                                <ChevronLeft className="h-4 w-4" />
-                                Previous
-                            </Button>
-                        )}
-                        {module.navigation.next ? (
-                            <Link href={`/module/${module.navigation.next}`}>
-                                <Button variant="outline" size="sm" className="gap-1.5">
-                                    Next
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </Link>
-                        ) : (
-                            <Button variant="outline" size="sm" className="gap-1.5" disabled>
-                                Next
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        )}
-                    </div>
-                )}
+                <div className="flex items-center gap-2">
+                    <CreateLessonDialog courses={courses} courseId={courseId} />
+                </div>
             </div>
 
             {/* Hero Section */}
             <div className="space-y-5">
-                {/* Breadcrumb path */}
-                {/* <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {module.course && (
-                        <>
-                            <Link href={`/course/${module.course.id}`} className="hover:text-foreground transition-colors">
-                                {module.course.title}
-                            </Link>
-                            <ChevronRight className="h-3 w-3" />
-                        </>
-                    )}
-                    <span className="text-foreground font-medium">{module.title}</span>
-                </div> */}
 
                 {/* Title + Badges */}
                 <div className="flex items-start gap-5">
