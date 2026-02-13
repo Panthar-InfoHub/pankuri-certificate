@@ -16,29 +16,32 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import Image from "next/image"
+import { deleteVideo } from "@/lib/backend_actions/videos"
 
 
 
 export function DeleteVideoDialog({ children, video }) {
+
+    console.log("Video in delete ==> ", video)
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
 
     const handleDelete = () => {
-        if (!video._id) {
+        if (!video.id) {
             toast.error("Video ID is missing")
             return
         }
 
         startTransition(async () => {
             try {
-                // const result = await deleteVideo(video._id)
+                const result = await deleteVideo(video.id)
 
-                // if (result.success) {
-                //     toast.success("Video deleted successfully")
-                //     router.refresh()
-                // } else {
-                //     toast.warning(result.error || "Failed to delete video")
-                // }
+                if (result.success) {
+                    toast.success("Video deleted successfully")
+                    router.refresh()
+                } else {
+                    toast.warning(result.error || "Failed to delete video")
+                }
             } catch (error) {
                 toast.error((error).message || "An unexpected error occurred")
             }

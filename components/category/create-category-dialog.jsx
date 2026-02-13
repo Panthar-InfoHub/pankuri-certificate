@@ -25,9 +25,10 @@ const categorySchema = z.object({
     icon: z.string(),
     parentId: z.string(),
     hasPricing: z.boolean().default(false),
-    price: z.number().optional(),
-    discountedPrice: z.number().optional(),
-    type: z.string().optional(),
+    monthlyPrice: z.number().optional(),
+    monthlyDiscountedPrice: z.number().optional(),
+    yearlyPrice: z.number().optional(),
+    yearlyDiscountedPrice: z.number().optional(),
     sequence: z.number().int().nonnegative(),
 })
 
@@ -49,9 +50,10 @@ export function CreateCategoryDialog({
             icon: "",
             parentId: "",
             hasPricing: false,
-            price: 0,
-            discountedPrice: 0,
-            type: "",
+            monthlyPrice: 0,
+            monthlyDiscountedPrice: 0,
+            yearlyPrice: 0,
+            yearlyDiscountedPrice: 0,
             sequence: 1,
         },
         validators: {
@@ -81,10 +83,34 @@ export function CreateCategoryDialog({
                         toast.success("Icon uploaded successfully")
                     }
 
+                    // Prepare pricing data
+                    const pricingData = []
+                    if (value.hasPricing) {
+                        if (value.monthlyPrice > 0) {
+                            pricingData.push({
+                                type: "monthly",
+                                price: value.monthlyPrice * 100,
+                                discountedPrice: value.monthlyDiscountedPrice * 100,
+                            })
+                        }
+                        if (value.yearlyPrice > 0) {
+                            pricingData.push({
+                                type: "yearly",
+                                price: value.yearlyPrice * 100,
+                                discountedPrice: value.yearlyDiscountedPrice * 100,
+                            })
+                        }
+                    }
+
                     // Create category with uploaded icon URL
                     const result = await createCategory({
-                        ...value,
-                        icon: iconUrl
+                        name: value.name,
+                        description: value.description,
+                        slug: value.slug,
+                        icon: iconUrl,
+                        parentId: value.parentId,
+                        sequence: value.sequence,
+                        pricing: pricingData,
                     })
 
                     if (result.success) {
@@ -157,7 +183,7 @@ export function CreateCategoryDialog({
                     <DialogTitle>Create New Category</DialogTitle>
                     <DialogDescription>Add a new category to your system</DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="h-96 w-full">
+                <ScrollArea className="h-[600px] w-full">
                     <form
                         onSubmit={(e) => {
                             e.preventDefault()
@@ -258,78 +284,121 @@ export function CreateCategoryDialog({
                                 children={(hasPricing) => (
                                     hasPricing ? (
                                         <div className="mt-6 pt-6 border-t border-dashed grid gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                                <form.Field
-                                                    name="price"
-                                                    children={(field) => (
-                                                        <Field className="flex flex-col gap-2">
-                                                            <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
-                                                                Base Price (₹) *
-                                                            </FieldLabel>
-                                                            <Input
-                                                                id={field.name}
-                                                                value={field.state.value}
-                                                                disabled={isPending}
-                                                                type="number"
-                                                                min="0"
-                                                                onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
-                                                                placeholder="0.00"
-                                                                className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
-                                                            />
-                                                            <FieldDescription className="text-[10px]">
-                                                                Original price before discount
-                                                            </FieldDescription>
-                                                            {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                                        </Field>
-                                                    )}
-                                                />
+                                            {/* Monthly Pricing */}
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-2">
+                                                    <CreditCard className="w-4 h-4 text-muted-foreground" />
+                                                    <h4 className="text-sm font-semibold">Monthly Subscription</h4>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <form.Field
+                                                        name="monthlyPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Base Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    value={field.state.value}
+                                                                    disabled={isPending}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Original monthly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
 
-                                                <form.Field
-                                                    name="discountedPrice"
-                                                    children={(field) => (
-                                                        <Field className="flex flex-col gap-2">
-                                                            <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
-                                                                Discounted Price (₹)
-                                                            </FieldLabel>
-                                                            <Input
-                                                                id={field.name}
-                                                                type="number"
-                                                                min="0"
-                                                                value={field.state.value}
-                                                                onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
-                                                                placeholder="0.00"
-                                                                className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
-                                                            />
-                                                            <FieldDescription className="text-[10px]">
-                                                                Final price users will pay
-                                                            </FieldDescription>
-                                                            {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                                        </Field>
-                                                    )}
-                                                />
+                                                    <form.Field
+                                                        name="monthlyDiscountedPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Discounted Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={field.state.value}
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Final monthly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
+                                                </div>
                                             </div>
 
-                                            <form.Field
-                                                name="type"
-                                                children={(field) => (
-                                                    <Field className="flex flex-col gap-2">
-                                                        <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80 flex items-center gap-2">
-                                                            <CreditCard className="w-4 h-4 text-muted-foreground" />
-                                                            Subscription Billing Cycle
-                                                        </FieldLabel>
-                                                        <Select disabled={isPending} value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
-                                                            <SelectTrigger className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1">
-                                                                <SelectValue placeholder="Select billing frequency" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="monthly" className="cursor-pointer">Monthly Billing</SelectItem>
-                                                                <SelectItem value="yearly" className="cursor-pointer">Yearly Billing</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                                    </Field>
-                                                )}
-                                            />
+                                            {/* Yearly Pricing */}
+                                            <div className="space-y-4 pt-4 border-t border-dashed">
+                                                <div className="flex items-center gap-2">
+                                                    <CreditCard className="w-4 h-4 text-muted-foreground" />
+                                                    <h4 className="text-sm font-semibold">Yearly Subscription</h4>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <form.Field
+                                                        name="yearlyPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Base Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    value={field.state.value}
+                                                                    disabled={isPending}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Original yearly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
+
+                                                    <form.Field
+                                                        name="yearlyDiscountedPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Discounted Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={field.state.value}
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Final yearly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     ) : null
                                 )}

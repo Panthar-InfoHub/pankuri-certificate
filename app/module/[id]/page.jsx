@@ -44,7 +44,7 @@ async function ModuleDetailContent({ moduleId }) {
 
                 {/* Prev / Next Module Navigation */}
                 <div className="flex items-center gap-2">
-                    <CreateLessonDialog courses={courses} courseId={courseId} />
+                    <CreateLessonDialog courses={courses} courseId={courseId} moduleId={moduleId} />
                 </div>
             </div>
 

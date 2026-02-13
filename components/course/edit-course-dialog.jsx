@@ -306,6 +306,8 @@ export function EditCourseDialog({ course, categories, children }) {
                                         </FieldLabel>
                                         <FieldDescription>
                                             Does this course have a specific price?
+                                            <br />
+                                            <em> By default, courses are locked because of wholeapp lock, Add amount for course specific pricing  </em>
                                         </FieldDescription>
                                     </div>
                                     <Switch
@@ -316,7 +318,6 @@ export function EditCourseDialog({ course, categories, children }) {
                                 </div>
                             )}
                         />
-
 
                         <form.Subscribe selector={(state) => state.values.hasPricing}
                             children={(hasPricing) => (

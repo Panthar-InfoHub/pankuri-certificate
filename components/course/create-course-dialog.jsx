@@ -171,7 +171,7 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
     return (
         <Dialog>
             <DialogTrigger >{children}</DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>Create New Course</DialogTitle>
                     <DialogDescription>Add a new course to your platform</DialogDescription>
@@ -482,73 +482,76 @@ export function CreateCourseDialog({ children, categories, trainers = [] }) {
                             />
                         </Field>
 
-                        <form.Field
-                            name="thumbnailImage"
-                            children={(field) => (
-                                <Field>
-                                    <FieldLabel htmlFor="thumbnail">Thumbnail Image</FieldLabel>
-                                    <Input
-                                        id="thumbnail"
-                                        type="file"
-                                        accept="image/*"
-                                        disabled={isPending}
-                                        onChange={e => { handleImageChange(e, setThumbnailFile, setThumbnailPreview) }}
-                                        className="cursor-pointer"
-                                    />
-                                    {thumbnailFile && <p className="text-sm text-muted-foreground mt-1">Selected: {thumbnailFile.name}</p>}
-                                    {thumbnailPreview && (
-                                        <div className="relative w-full h-32 rounded-md overflow-hidden border border-input mt-2">
-                                            <Image src={thumbnailPreview} alt="Thumbnail Preview" fill className="object-cover" />
-                                            <Button
-                                                type="button"
-                                                variant="destructive"
-                                                size="icon"
-                                                className="absolute top-2 right-2 h-6 w-6"
-                                                onClick={handleRemoveThumbnail}
-                                                disabled={isPending}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                </Field>
-                            )}
-                        />
+                        <Field orientation="horizontal">
 
-                        <form.Field
-                            name="coverImage"
-                            children={(field) => (
-                                <Field>
-                                    <FieldLabel htmlFor="cover">Cover Image</FieldLabel>
-                                    <Input
-                                        id="cover"
-                                        type="file"
-                                        accept="image/*"
-                                        disabled={isPending}
-                                        onChange={e => { handleImageChange(e, setCoverFile, setCoverPreview) }}
-                                        className="cursor-pointer"
-                                    />
-                                    {coverFile && <p className="text-sm text-muted-foreground mt-1">Selected: {coverFile.name}</p>}
-                                    {coverPreview && (
-                                        <div className="relative w-full h-32 rounded-md overflow-hidden border border-input mt-2">
-                                            <Image src={coverPreview} alt="Cover Preview" fill className="object-cover" />
-                                            <Button
-                                                type="button"
-                                                variant="destructive"
-                                                size="icon"
-                                                className="absolute top-2 right-2 h-6 w-6"
-                                                onClick={handleRemoveCover}
-                                                disabled={isPending}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                </Field>
-                            )}
-                        />
+                            <form.Field
+                                name="thumbnailImage"
+                                children={(field) => (
+                                    <Field>
+                                        <FieldLabel htmlFor="thumbnail">Thumbnail Image</FieldLabel>
+                                        <Input
+                                            id="thumbnail"
+                                            type="file"
+                                            accept="image/*"
+                                            disabled={isPending}
+                                            onChange={e => { handleImageChange(e, setThumbnailFile, setThumbnailPreview) }}
+                                            className="cursor-pointer"
+                                        />
+                                        {thumbnailFile && <p className="text-sm text-muted-foreground mt-1">Selected: {thumbnailFile.name}</p>}
+                                        {thumbnailPreview && (
+                                            <div className="relative w-full aspect-video rounded-md overflow-hidden border border-input mt-2">
+                                                <Image src={thumbnailPreview} alt="Thumbnail Preview" fill className="object-cover" />
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    className="absolute top-2 right-2 h-6 w-6"
+                                                    onClick={handleRemoveThumbnail}
+                                                    disabled={isPending}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                    </Field>
+                                )}
+                            />
+
+                            <form.Field
+                                name="coverImage"
+                                children={(field) => (
+                                    <Field>
+                                        <FieldLabel htmlFor="cover">Cover Image</FieldLabel>
+                                        <Input
+                                            id="cover"
+                                            type="file"
+                                            accept="image/*"
+                                            disabled={isPending}
+                                            onChange={e => { handleImageChange(e, setCoverFile, setCoverPreview) }}
+                                            className="cursor-pointer"
+                                        />
+                                        {coverFile && <p className="text-sm text-muted-foreground mt-1">Selected: {coverFile.name}</p>}
+                                        {coverPreview && (
+                                            <div className="relative w-full aspect-video rounded-md overflow-hidden border border-input mt-2">
+                                                <Image src={coverPreview} alt="Cover Preview" fill className="object-cover" />
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    className="absolute top-2 right-2 h-6 w-6"
+                                                    onClick={handleRemoveCover}
+                                                    disabled={isPending}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                    </Field>
+                                )}
+                            />
+                        </Field>
 
                         <Field orientation="horizontal">
                             <DialogClose asChild>

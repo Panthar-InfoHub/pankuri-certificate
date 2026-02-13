@@ -96,7 +96,14 @@ export function VideoUploadForm({ onSuccess }) {
                                     },
                                 })
                                 console.log("\nResponse:", response.headers)
-                                return { PartNumber: partData.partNumber, ETag: response.headers.etag.replace(/"/g, "") }
+        
+                                // Safe ETag extraction with fallback
+                                const etag = response.headers.etag || response.headers.ETag || response.headers['etag']
+                                if (!etag) {
+                                    throw new Error(`Missing ETag for part ${partData.partNumber}`)
+                                }
+                                
+                                return { PartNumber: partData.partNumber, ETag: etag.replace(/"/g, "") }
                             })
                         )
                         // console.log("\nUploaded Parts:", uploadedParts)

@@ -10,17 +10,18 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { generatePresignedUrlForImage } from "@/lib/action"
 import { updateCategory } from "@/lib/backend_actions/category"
 import { useForm } from "@tanstack/react-form"
 import axios from "axios"
-import { Loader2, X } from "lucide-react"
+import { CreditCard, Loader2, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -35,9 +36,16 @@ const categorySchema = z.object({
     icon: z.string(),
     parentId: z.string(),
     sequence: z.coerce.number().int().nonnegative(),
+    hasPricing: z.boolean().default(false),
+    monthlyPrice: z.number().optional(),
+    monthlyDiscountedPrice: z.number().optional(),
+    yearlyPrice: z.number().optional(),
+    yearlyDiscountedPrice: z.number().optional(),
 })
 
 export function EditCategoryDialog({ category, parentCategories, children }) {
+
+
     const [open, setOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
@@ -45,6 +53,10 @@ export function EditCategoryDialog({ category, parentCategories, children }) {
     const [imageFile, setImageFile] = useState(null)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [selectedParent, setSelectedParent] = useState(null)
+
+    // Extract monthly and yearly pricing from the pricing array
+    const monthlyPlan = category.pricing?.find(p => p.subscriptionType === "monthly")
+    const yearlyPlan = category.pricing?.find(p => p.subscriptionType === "yearly")
 
     const form = useForm({
         defaultValues: {
@@ -54,6 +66,11 @@ export function EditCategoryDialog({ category, parentCategories, children }) {
             icon: category.icon || "",
             parentId: category.parentId || "",
             sequence: category.sequence,
+            hasPricing: category.isPaid || false,
+            monthlyPrice: monthlyPlan?.price ? monthlyPlan.price / 100 : 0,
+            monthlyDiscountedPrice: monthlyPlan?.discountedPrice ? monthlyPlan.discountedPrice / 100 : 0,
+            yearlyPrice: yearlyPlan?.price ? yearlyPlan.price / 100 : 0,
+            yearlyDiscountedPrice: yearlyPlan?.discountedPrice ? yearlyPlan.discountedPrice / 100 : 0,
         },
         validators: {
             onSubmit: categorySchema,
@@ -85,10 +102,34 @@ export function EditCategoryDialog({ category, parentCategories, children }) {
                         toast.success("Icon uploaded successfully")
                     }
 
+                    // Prepare pricing data
+                    const pricingData = []
+                    if (value.hasPricing) {
+                        if (value.monthlyPrice > 0) {
+                            pricingData.push({
+                                type: "monthly",
+                                price: value.monthlyPrice * 100,
+                                discountedPrice: value.monthlyDiscountedPrice * 100,
+                            })
+                        }
+                        if (value.yearlyPrice > 0) {
+                            pricingData.push({
+                                type: "yearly",
+                                price: value.yearlyPrice * 100,
+                                discountedPrice: value.yearlyDiscountedPrice * 100,
+                            })
+                        }
+                    }
+
                     // Update category with uploaded icon URL
                     const result = await updateCategory(category.id, {
-                        ...value,
-                        icon: iconUrl
+                        name: value.name,
+                        description: value.description,
+                        slug: value.slug,
+                        icon: iconUrl,
+                        parentId: value.parentId,
+                        sequence: value.sequence,
+                        pricing: pricingData,
                     })
 
                     if (result.success) {
@@ -140,27 +181,24 @@ export function EditCategoryDialog({ category, parentCategories, children }) {
         setImageFile(null)
         setImagePreview("")
         form.setFieldValue("icon", "")
-        // Reset file input
-        // const fileInput = document.getElementById("icon")
-        // if (fileInput) fileInput.value = ""
     }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[720px]">
                 <DialogHeader>
                     <DialogTitle>Edit Category</DialogTitle>
                     <DialogDescription>Update category information</DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="h-96 w-full pr-4">
+                <ScrollArea className="h-[600px] w-full">
                     <form
                         onSubmit={(e) => {
                             e.preventDefault()
                             e.stopPropagation()
                             form.handleSubmit()
                         }}
-                        className="space-y-6"
+                        className="space-y-4 px-2"
                     >
                         <form.Field
                             name="name"
@@ -174,27 +212,6 @@ export function EditCategoryDialog({ category, parentCategories, children }) {
                                         placeholder="Enter category name"
                                         disabled={isPending}
                                         value={field.state.value}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                        onBlur={field.handleBlur}
-                                    />
-                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                </Field>
-                            )}
-                        />
-
-                        <form.Field
-                            name="description"
-                            children={(field) => (
-                                <Field>
-                                    <FieldLabel htmlFor="description" className="text-sm font-medium">
-                                        Description
-                                    </FieldLabel>
-                                    <Textarea
-                                        id="description"
-                                        placeholder="Enter category description"
-                                        disabled={isPending}
-                                        rows={4}
-                                        value={field.state.value || ""}
                                         onChange={(e) => field.handleChange(e.target.value)}
                                         onBlur={field.handleBlur}
                                     />
@@ -222,6 +239,174 @@ export function EditCategoryDialog({ category, parentCategories, children }) {
                                 </Field>
                             )}
                         />
+
+                        <form.Field
+                            name="description"
+                            children={(field) => (
+                                <Field>
+                                    <FieldLabel htmlFor="description" className="text-sm font-medium">
+                                        Description
+                                    </FieldLabel>
+                                    <Textarea
+                                        id="description"
+                                        placeholder="Enter category description"
+                                        disabled={isPending}
+                                        rows={3}
+                                        value={field.state.value || ""}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        onBlur={field.handleBlur}
+                                    />
+                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                </Field>
+                            )}
+                        />
+
+                        <div className="p-4 rounded-xl border border-dashed bg-muted/40 transition-all duration-300 hover:bg-muted/60">
+                            <form.Field
+                                name="hasPricing"
+                                children={(field) => (
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="space-y-0.5">
+                                            <FieldLabel htmlFor={field.name} className="text-base font-semibold flex items-center gap-2">
+                                                Category Specific Pricing
+                                            </FieldLabel>
+                                            <FieldDescription>
+                                                Enable if this category requires a separate subscription or purchase.
+                                            </FieldDescription>
+                                        </div>
+                                        <Switch
+                                            id={field.name}
+                                            checked={field.state.value}
+                                            onCheckedChange={(checked) => field.handleChange(checked)}
+                                        />
+                                    </div>
+                                )}
+                            />
+
+                            <form.Subscribe selector={(state) => state.values.hasPricing}
+                                children={(hasPricing) => (
+                                    hasPricing ? (
+                                        <div className="mt-6 pt-6 border-t border-dashed grid gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            {/* Monthly Pricing */}
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-2">
+                                                    <CreditCard className="w-4 h-4 text-muted-foreground" />
+                                                    <h4 className="text-sm font-semibold">Monthly Subscription</h4>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <form.Field
+                                                        name="monthlyPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Base Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    value={field.state.value}
+                                                                    disabled={isPending}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Original monthly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
+
+                                                    <form.Field
+                                                        name="monthlyDiscountedPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Discounted Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={field.state.value}
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Final monthly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Yearly Pricing */}
+                                            <div className="space-y-4 pt-4 border-t border-dashed">
+                                                <div className="flex items-center gap-2">
+                                                    <CreditCard className="w-4 h-4 text-muted-foreground" />
+                                                    <h4 className="text-sm font-semibold">Yearly Subscription</h4>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <form.Field
+                                                        name="yearlyPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Base Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    value={field.state.value}
+                                                                    disabled={isPending}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Original yearly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
+
+                                                    <form.Field
+                                                        name="yearlyDiscountedPrice"
+                                                        children={(field) => (
+                                                            <Field className="flex flex-col gap-2">
+                                                                <FieldLabel htmlFor={field.name} className="text-sm font-medium text-foreground/80">
+                                                                    Discounted Price (₹)
+                                                                </FieldLabel>
+                                                                <Input
+                                                                    id={field.name}
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={field.state.value}
+                                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                                    placeholder="0"
+                                                                    className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
+                                                                />
+                                                                <FieldDescription className="text-[10px]">
+                                                                    Final yearly price
+                                                                </FieldDescription>
+                                                                {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
+                                                            </Field>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : null
+                                )}
+                            />
+                        </div>
 
                         <form.Field
                             name="parentId"
