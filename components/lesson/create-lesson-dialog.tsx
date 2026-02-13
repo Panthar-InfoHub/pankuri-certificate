@@ -65,17 +65,19 @@ const lessonSchema = z.object({
     path: ["scheduledAt"]
 })
 
-export default function CreateLessonDialog({ courses, courseId }) {
+export default function CreateLessonDialog({ courses, courseId, moduleId }) {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const [modules, setModules] = useState([])
     const [loadingModules, setLoadingModules] = useState(false)
 
+    console.log("CReating lesson module id ==> ", moduleId)
+
     const form = useForm({
         defaultValues: {
             courseId: courseId || "",
-            moduleId: "",
+            moduleId: moduleId || "",
             title: "",
             slug: "",
             type: "video" as "video" | "text",
@@ -260,6 +262,7 @@ export default function CreateLessonDialog({ courses, courseId }) {
                         name="moduleId"
                         children={(field) => (
                             <Field className="space-y-2">
+                                {field.state.value}
                                 <FieldLabel htmlFor={field.name}>Module *</FieldLabel>
                                 <Select
                                     value={field.state.value}

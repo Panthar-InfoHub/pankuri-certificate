@@ -22,7 +22,6 @@ const moduleSchema = z.object({
     description: z.string().optional(),
     sequence: z.number().int().min(1, "Sequence must be at least 1"),
     duration: z.number().int().min(0).optional(),
-    status: z.enum(["draft", "published", "archived"]),
 })
 
 export default function CreateModuleDialog({ courses, courseId }) {
@@ -38,7 +37,6 @@ export default function CreateModuleDialog({ courses, courseId }) {
             description: "",
             sequence: 1,
             duration: 0,
-            status: "draft",
         },
         validators: {
             onSubmit: moduleSchema,
@@ -220,7 +218,7 @@ export default function CreateModuleDialog({ courses, courseId }) {
                     />
 
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         {/* Sequence */}
                         <form.Field
                             name="sequence"
@@ -260,29 +258,6 @@ export default function CreateModuleDialog({ courses, courseId }) {
                         />
 
 
-                        {/* Status */}
-                        <form.Field
-                            name="status"
-                            children={(field) => (
-                                <Field className="space-y-2">
-                                    <FieldLabel htmlFor={field.name}>Status *</FieldLabel>
-                                    <Select
-                                        value={field.state.value}
-                                        onValueChange={(value) => field.handleChange(value)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="draft">Draft</SelectItem>
-                                            <SelectItem value="published">Published</SelectItem>
-                                            <SelectItem value="archived">Archived</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
-                                </Field>
-                            )}
-                        />
                     </div>
 
                     <Field orientation="horizontal">

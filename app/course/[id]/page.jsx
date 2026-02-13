@@ -194,7 +194,7 @@ async function CourseDetailContent({ courseId }) {
                     {/* Action buttons row */}
                     <div className="flex flex-wrap items-center gap-3 pt-2">
                         {(course.demoVideoId && course.demoVideo) ? (
-                            <VideoPlayer video={{ id: course.demoVideo.id, title: "Course Demo Video", thumbnailUrl: course.thumbnailImage, playbackUrl: course.demoVideo.playbackUrl }}>
+                            <VideoPlayer video={{ id: course.demoVideo.id, title: "Course Demo Video", thumbnailUrl: course.thumbnailImage, playbackUrl: course.demoVideo.playbackUrl, externalUrl: course.externalUrl }}>
                                 <Button variant="gradient" size="default" className="gap-2">
                                     <PlayCircle className="h-4 w-4" />
                                     Watch Demo

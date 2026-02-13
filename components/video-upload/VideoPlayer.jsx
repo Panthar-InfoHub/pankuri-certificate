@@ -24,23 +24,30 @@ export function VideoPlayer({ isOpen, onClose, video, children }) {
         let isMounted = true;
         setLoading(true);
 
-        getVideoPlaybackUrl(video.playbackUrl)
-            .then(result => {
-                if (!isMounted) return;
-                if (result.success && result.url) {
-                    setSignedUrl(result.url);
-                } else {
-                    toast.error(result.error || 'Failed to load video');
-                    effectiveOnClose();
-                }
-                setLoading(false);
-            }).catch(error => {
-                if (!isMounted) return;
-                toast.error('Failed to load video');
-                console.error('Error fetching video playback URL:', error);
-            }).finally(() => {
-                setLoading(false);
-            });
+        if (video.playbackUrl) {
+            getVideoPlaybackUrl(video.playbackUrl)
+                .then(result => {
+                    if (!isMounted) return;
+                    if (result.success && result.url) {
+                        setSignedUrl(result.url);
+                    } else {
+                        toast.error(result.error || 'Failed to load video');
+                        effectiveOnClose();
+                    }
+                    setLoading(false);
+                }).catch(error => {
+                    console.error('Error fetching video playback URL:', video);
+                    if (!isMounted) return;
+                    toast.error('Failed to load video');
+                    console.error('Error fetching video playback URL:', error);
+                }).finally(() => {
+                    setLoading(false);
+                });
+        } else if (video.externalUrl) {
+            setSignedUrl(video.externalUrl);
+            setLoading(false);
+            return;
+        }
         return () => { isMounted = false; };
     }, [effectiveOpen, video.id]);
 
