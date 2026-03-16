@@ -51,6 +51,9 @@ const navigationLinks = [
       { href: "/plan/user-subscription", label: "Subscription Management", icon: LayoutDashboard, description: "Manage user subscriptions" },
     ]
   },
+  {
+    href: "/brand-settings", label: "Brand Settings", icon: Boxes
+  },
 
 ]
 
