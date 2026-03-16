@@ -46,8 +46,8 @@ const navigationLinks = [
   {
     href: "/subscription-management", label: "Subscription Management", icon: IndianRupee,
     children: [
-      { href: "/plan/category", label: "Category Plan", icon: LayoutDashboard, description: "Manage categories" },
-      { href: "/plan/app", label: "App Plan", icon: Boxes, description: "Manage whole app plans" },
+      { href: "/plan/category", label: "Plans Management", icon: LayoutDashboard, description: "Manage whole app, category and course plans" },
+      // { href: "/plan/app", label: "App Plan", icon: Boxes, description: "Manage whole app plans" },
       { href: "/plan/user-subscription", label: "Subscription Management", icon: LayoutDashboard, description: "Manage user subscriptions" },
     ]
   },
@@ -168,16 +168,16 @@ export default function Component() {
                                   <Link
                                     href={component.href}
                                     className={`${isChildActive
-                                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                                      : "text-foreground hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 "
+                                      ? "bg-linear-to-r from-purple-300 to-pink-300 text-black shadow-lg shadow-purple-500/25"
+                                      : "text-foreground hover:bg-linear-to-r hover:from-purple-100 hover:to-pink-100 "
                                       }`} >
                                     <div className="flex items-center gap-2">
-                                      <ChildIcon size={14} className={isChildActive ? "text-white" : "text-muted-foreground/80"} />
-                                      <div className={`text-sm font-medium leading-none ${isChildActive ? "text-white" : ""}`}>
+                                      <ChildIcon size={14} className={isChildActive ? "text-gray-600" : "text-muted-foreground/80"} />
+                                      <div className={`text-sm font-medium leading-none ${isChildActive ? "text-gray-600" : ""}`}>
                                         {component.label}
                                       </div>
                                     </div>
-                                    <p className={`line-clamp-2 text-sm leading-snug ${isChildActive ? "text-white" : "text-muted-foreground"}`}>
+                                    <p className={`line-clamp-2 text-xs leading-snug ${isChildActive ? "text-gray-600" : "text-muted-foreground"}`}>
                                       {component.description}
                                     </p>
                                   </Link>

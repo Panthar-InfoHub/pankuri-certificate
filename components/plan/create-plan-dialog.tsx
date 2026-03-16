@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import { toast } from "sonner"
 import z from "zod"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Loader2, CreditCard, Banknote } from "lucide-react"
+import { Loader2, CreditCard, Banknote, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createPlan } from "@/lib/backend_actions/plans"
+import { Switch } from "../ui/switch"
 
 const planSchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters"),
@@ -22,6 +23,7 @@ const planSchema = z.object({
     planType: z.literal("WHOLE_APP"),
     price: z.number().min(0, "Price must be positive"),
     currency: z.literal("INR"),
+    deactivateOthers: z.boolean().optional(),
 })
 
 export function CreatePlanDialog({ children }: { children: React.ReactNode }) {
@@ -37,6 +39,7 @@ export function CreatePlanDialog({ children }: { children: React.ReactNode }) {
             planType: "WHOLE_APP",
             price: 0,
             currency: "INR",
+            deactivateOthers: true,
         } as z.infer<typeof planSchema>,
         validators: {
             onSubmit: planSchema,
@@ -160,6 +163,46 @@ export function CreatePlanDialog({ children }: { children: React.ReactNode }) {
                             )}
                         />
 
+
+
+                        <div className={`p-4 rounded-xl border transition-all duration-300 ${form.getFieldValue("deactivateOthers") ? "border-amber-400/60 bg-amber-50/40 dark:bg-amber-950/20" : "border-dashed bg-muted/40 hover:bg-muted/60"}`}>
+                            <form.Field
+                                name="deactivateOthers"
+                                children={(field) => (
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="space-y-1">
+                                            <FieldLabel
+                                                htmlFor={field.name}
+                                                className="text-sm font-semibold flex items-center gap-2 cursor-pointer"
+                                            >
+                                                <AlertTriangle className={`w-4 h-4 transition-colors duration-200 ${field.state.value ? "text-amber-500" : "text-muted-foreground"}`} aria-hidden="true" />
+                                                Deactivate other plans
+                                            </FieldLabel>
+                                            <FieldDescription
+                                                id="deactivate-others-description"
+                                                className={`text-[11px] font-medium transition-colors duration-200 ${field.state.value ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}
+                                            >
+                                                {field.state.value
+                                                    ? "All other active plans will be deactivated when this plan is created."
+                                                    : "Other active plans will remain unchanged."}
+                                            </FieldDescription>
+                                        </div>
+                                        <Switch
+                                            id={field.name}
+                                            checked={field.state.value}
+                                            aria-label="Deactivate other plans when this plan is activated"
+                                            aria-describedby="deactivate-others-description"
+                                            onCheckedChange={(checked) => field.handleChange(checked)}
+                                        />
+                                    </div>
+                                )}
+                            />
+                        </div>
+
+
+
+
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <form.Field
                                 name="subscriptionType"
@@ -169,7 +212,7 @@ export function CreatePlanDialog({ children }: { children: React.ReactNode }) {
                                             <CreditCard className="w-4 h-4 text-muted-foreground" />
                                             Billing Cycle *
                                         </FieldLabel>
-                                        <Select disabled={isPending} value={field.state.value} onValueChange={(value: "monthly" | "yearly") => field.handleChange(value)}>
+                                        <Select disabled={isPending} aria-describedby="cycle-readonly-message" value={field.state.value} onValueChange={(value: "monthly" | "yearly") => field.handleChange(value)}>
                                             <SelectTrigger className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1">
                                                 <SelectValue placeholder="Select cycle" />
                                             </SelectTrigger>
@@ -178,6 +221,9 @@ export function CreatePlanDialog({ children }: { children: React.ReactNode }) {
                                                 <SelectItem value="yearly" className="cursor-pointer">Yearly</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                        <FieldDescription id="cycle-readonly-message" className="text-[10px] text-amber-600 font-medium">
+                                            How often the user will be charged.
+                                        </FieldDescription>
                                         {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
                                     </Field>
                                 )}
@@ -197,13 +243,15 @@ export function CreatePlanDialog({ children }: { children: React.ReactNode }) {
                                             disabled={isPending}
                                             type="number"
                                             min="0"
+                                            aria-describedby="price-readonly-message"
                                             onChange={(e) => field.handleChange(parseFloat(e.target.value) || 0)}
                                             placeholder="0.00"
                                             className="h-10 bg-background shadow-sm transition-shadow focus-visible:ring-1"
                                         />
-                                        <p className="text-[10px] text-muted-foreground">
+
+                                        <FieldDescription id="price-readonly-message" className="text-[10px] text-amber-600 font-medium">
                                             Enter price in Rupees. It will be stored as Paise.
-                                        </p>
+                                        </FieldDescription>
                                         {field.state.meta.errors.length > 0 && <FieldError errors={field.state.meta.errors} />}
                                     </Field>
                                 )}

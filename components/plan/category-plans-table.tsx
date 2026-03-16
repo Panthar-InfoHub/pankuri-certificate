@@ -19,6 +19,7 @@ import { useState, useTransition } from "react"
 // import { deletePlan } from "@/lib/backend_actions/plans"
 import PaginationNumberless from "../customized/pagination/pagination-12"
 import { toast } from "sonner"
+import { HandleCopyBtn } from "@/lib/client.utils"
 
 interface PlanProps {
     plans: any[]
@@ -27,7 +28,6 @@ interface PlanProps {
 
 export function CategoryPlansTable({ plans, pagination }: PlanProps) {
     const router = useRouter()
-    const [copiedId, setCopiedId] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
 
     if (!plans || plans.length === 0) {
@@ -37,17 +37,6 @@ export function CategoryPlansTable({ plans, pagination }: PlanProps) {
             </div>
         )
     }
-
-    const handleCopy = async (text: string, id: string) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            setCopiedId(id);
-            toast.success("Plan ID copied to clipboard");
-            setTimeout(() => setCopiedId(null), 2000);
-        } catch (err) {
-            console.error("Failed to copy", err);
-        }
-    };
 
     return (
         <>
@@ -72,32 +61,25 @@ export function CategoryPlansTable({ plans, pagination }: PlanProps) {
                                     <div className="text-xs text-muted-foreground">{plan.slug}</div>
                                 </TableCell>
 
-                                <TableCell className="cursor-pointer" onClick={() => handleCopy(plan.planId, plan.id)}>
-                                    <Badge variant="secondary" className="flex items-center gap-2 w-fit">
-                                        {plan.planId || "N/A"}
-                                        {copiedId === plan.id ? (
-                                            <Check className="h-3 w-3" />
-                                        ) : (
-                                            <CopyCheck className="h-3 w-3" />
-                                        )}
-                                    </Badge>
+                                <TableCell className="cursor-pointer">
+                                    <HandleCopyBtn id={plan.id} />
                                 </TableCell>
                                 <TableCell className="capitalize">
-                                    <Badge variant="default">
+                                    <Badge variant="outline">
                                         {plan.subscriptionType}
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col">
-                                        <span className="font-bold">₹{plan.discountedPrice}</span>
-                                        {plan.price > plan.discountedPrice && (
-                                            <span className="text-xs text-muted-foreground line-through">₹{plan.price}</span>
+                                        <span className="font-bold">₹{(plan.discountedPrice || plan.price) / 100}</span>
+                                        {plan.price && (
+                                            <span className="text-xs text-muted-foreground line-through">₹{(plan.price) / 100}</span>
                                         )}
                                     </div>
                                 </TableCell>
                                 <TableCell className="capitalize">{plan.provider}</TableCell>
                                 <TableCell>
-                                    <Badge variant={plan.isActive ? "outline" : "secondary"}>
+                                    <Badge variant={plan.isActive ? "default" : "secondary"}>
                                         {plan.isActive ? "Active" : "Inactive"}
                                     </Badge>
                                 </TableCell>
