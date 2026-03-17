@@ -14,9 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MoreHorizontal, Pencil, Trash2, IndianRupee, Check, Copy, CopyCheck } from "lucide-react" // Importing IndianRupee for price if needed
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
-// import { toast } from "sonner" 
-// Uncomment and use toast and backend actions when available
-// import { deletePlan } from "@/lib/backend_actions/plans"
+import { EditPlanDialog } from "./edit-plan-dialog"
+import { DeletePlanDialog } from "./delete-plan-dialog"
+import { deletePlan } from "@/lib/backend_actions/plans"
 import PaginationNumberless from "../customized/pagination/pagination-12"
 import { toast } from "sonner"
 import { HandleCopyBtn } from "@/lib/client.utils"
@@ -94,16 +94,18 @@ export function CategoryPlansTable({ plans, pagination }: PlanProps) {
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                             <DropdownMenuSeparator />
-                                            {/* 
-                                            <DropdownMenuItem onClick={() => {}}>
-                                                <Pencil className="mr-2 h-4 w-4" />
-                                                Edit
-                                            </DropdownMenuItem>
-                                             */}
-                                            <DropdownMenuItem className="text-destructive">
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </DropdownMenuItem>
+                                            <EditPlanDialog plan={plan}>
+                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                    <Pencil className="mr-2 h-4 w-4" />
+                                                    Edit Plan Details
+                                                </DropdownMenuItem>
+                                            </EditPlanDialog>
+                                            <DeletePlanDialog plan={plan}>
+                                                <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Deactivate Plan
+                                                </DropdownMenuItem>
+                                            </DeletePlanDialog>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>

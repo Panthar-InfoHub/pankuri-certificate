@@ -51,12 +51,36 @@ export default async function CategoryPlansPage() {
                 </TabsList>
 
                 <TabsContent value="category" className="mt-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <p className="text-sm font-medium text-foreground">Category Plans</p>
+                            <p className="text-xs text-muted-foreground">Plans that grant access to specific categories</p>
+                        </div>
+                        <CreatePlanDialog initialPlanType="CATEGORY">
+                            <Button variant="gradient" className="shrink-0">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create Plan
+                            </Button>
+                        </CreatePlanDialog>
+                    </div>
                     <Suspense fallback={<TableSkeleton rows={4} columns={6} />}>
                         <PlansTableWrapper promise={categoryPlansPromise} label="category" />
                     </Suspense>
                 </TabsContent>
 
                 <TabsContent value="course" className="mt-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <p className="text-sm font-medium text-foreground">Course Plans</p>
+                            <p className="text-xs text-muted-foreground">Plans for individual courses</p>
+                        </div>
+                        <CreatePlanDialog initialPlanType="COURSE">
+                            <Button variant="gradient" className="shrink-0">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create Plan
+                            </Button>
+                        </CreatePlanDialog>
+                    </div>
                     <Suspense fallback={<TableSkeleton rows={4} columns={6} />}>
                         <PlansTableWrapper promise={coursePlansPromise} label="course" />
                     </Suspense>
