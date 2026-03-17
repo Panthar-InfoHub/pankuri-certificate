@@ -256,7 +256,7 @@ export function UsersTable({ users, pagination }: UserTableProps) {
 
             {/* Grant Manual Subscription Dialog */}
             <Dialog open={!!selectedUserForSub} onOpenChange={(open) => !open && setSelectedUserForSub(null)}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-xl overflow-x-hidden">
                     <DialogHeader>
                         <DialogTitle>Grant Manual Subscription</DialogTitle>
                         <DialogDescription>
@@ -303,7 +303,7 @@ export function UsersTable({ users, pagination }: UserTableProps) {
                                     }}
                                     disabled={!selectedPlanType || loadingPlans}
                                 >
-                                    <SelectTrigger className="w-full max-w-full overflow-hidden min-w-0">
+                                    <SelectTrigger className="w-full max-w-sm overflow-hidden min-w-0">
                                         <div className="truncate w-full text-left">
                                             <SelectValue placeholder={
                                                 loadingPlans ? "Loading plans..." 
