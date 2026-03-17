@@ -48,7 +48,7 @@ const navigationLinks = [
     children: [
       { href: "/plan/category", label: "Plans Management", icon: LayoutDashboard, description: "Manage whole app, category and course plans" },
       // { href: "/plan/app", label: "App Plan", icon: Boxes, description: "Manage whole app plans" },
-      { href: "/plan/user-subscription", label: "Subscription Management", icon: LayoutDashboard, description: "Manage user subscriptions" },
+      { href: "/orders", label: "Orders & Payments", icon: LayoutDashboard, description: "Manage user orders and payments" },
     ]
   },
   {
