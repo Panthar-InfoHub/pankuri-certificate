@@ -3,6 +3,7 @@ import { CoursesTable } from "@/components/course/courses-table"
 import { CreateCourseDialog } from "@/components/course/create-course-dialog"
 import BulkCourseUpload from "@/components/course/bulk-course-upload"
 import { Button } from "@/components/ui/button"
+import { CreateContentDialog } from "@/components/content-wizard/create-content-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
 import { getFlatCategories } from "@/lib/backend_actions/category"
@@ -60,12 +61,20 @@ async function CoursesContent({ searchP }) {
         <TabsContent value="single" className="mt-6">
           <div className="flex items-center justify-between mb-6">
             <CourseFilter categories={categories} />
-            <CreateCourseDialog categories={categories} trainers={trainers}>
-              <Button variant="gradient">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Course
-              </Button>
-            </CreateCourseDialog>
+            <div className="flex gap-2">
+              <CreateContentDialog>
+                <Button variant="gradient">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Upload Content
+                </Button>
+              </CreateContentDialog>
+              <CreateCourseDialog categories={categories} trainers={trainers}>
+                <Button variant="gradient">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Course
+                </Button>
+              </CreateCourseDialog>
+            </div>
           </div>
 
           <CoursesTable
