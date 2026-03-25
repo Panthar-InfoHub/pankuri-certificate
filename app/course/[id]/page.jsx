@@ -10,21 +10,23 @@ import { PageHeaderSkeleton } from "@/components/ui/skeleton-loader"
 import { VideoPlayer } from "@/components/video-upload/VideoPlayer"
 import { getFlatCategories } from "@/lib/backend_actions/category"
 import { getAllCourses, getCourseById } from "@/lib/backend_actions/course"
-import { ArrowLeft, Award, BookOpen, Bookmark, Clock, DollarSign, Download, Edit, GraduationCap, Lock, Pencil, PlayCircle, Share2, Unlock } from "lucide-react"
+import { ArrowLeft, Award, BookOpen, Bookmark, Clock, DollarSign, Download, Edit, GraduationCap, HelpCircle, Lock, MessageCircle, Pencil, PlayCircle, Share2, Unlock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
+import ManageWhatsappDialog from "@/components/course/manage-whatsapp-dialog"
+
+import ManageCourseFaqDialog from "@/components/course/manage-course-faq-dialog"
+
 async function CourseDetailContent({ courseId }) {
     // const result = await 
-
     const [result, coursesResult, categoriesResult] = await Promise.all([
         getCourseById(courseId),
         getAllCourses({ limit: 100, status: "active" }),
         getFlatCategories({ limit: 100, status: "active" }),
     ])
-
 
     if (!result.success || !result.data) {
         notFound()
@@ -44,7 +46,7 @@ async function CourseDetailContent({ courseId }) {
                 </Button>
             </Link>
 
-            {/* Cover Image Banner (if exists) */}
+            {/* Cover Image Banner */}
             {course.coverImage && (
                 <div className="relative -mx-6 -mt-10 mb-6 h-[280px] overflow-hidden rounded-none md:rounded-2xl">
                     <Image
@@ -58,10 +60,9 @@ async function CourseDetailContent({ courseId }) {
                 </div>
             )}
 
-            {/* Hero Section — Image left, details right */}
+            {/* Hero Section */}
             <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8 items-start">
-
-                {/* Left: Thumbnail Image */}
+                {/* Left: Thumbnail */}
                 <div className="relative aspect-3/4 w-full max-w-[340px] mx-auto lg:mx-0 rounded-2xl overflow-hidden bg-muted shadow-xl border-2">
                     {course.thumbnailImage ? (
                         <Image
@@ -78,9 +79,8 @@ async function CourseDetailContent({ courseId }) {
                     )}
                 </div>
 
-                {/* Right: Course Info */}
+                {/* Right: Info */}
                 <div className="flex flex-col space-y-6">
-                    {/* Title and Trainer */}
                     <div className="space-y-3">
                         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
                             {course.title}
@@ -104,7 +104,7 @@ async function CourseDetailContent({ courseId }) {
                         )}
                     </div>
 
-                    {/* Stats Grid */}
+                    {/* Stats */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-y">
                         <div className="space-y-1">
                             <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -136,7 +136,7 @@ async function CourseDetailContent({ courseId }) {
                         </div>
                     </div>
 
-                    {/* Badges row */}
+                    {/* Badges */}
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge variant={course.status === "active" ? "default" : "secondary"} className="capitalize">
                             {course.status}
@@ -149,29 +149,6 @@ async function CourseDetailContent({ courseId }) {
                         ) : (
                             <Badge variant="secondary" className="gap-1.5">
                                 Free Course
-                            </Badge>
-                        )}
-                        {course.hasAccess ? (
-                            <Badge variant="default" className="gap-1.5">
-                                <Unlock className="h-3 w-3" />
-                                Access Granted
-                            </Badge>
-                        ) : (
-                            <Badge variant="outline" className="gap-1.5">
-                                <Lock className="h-3 w-3" />
-                                Locked
-                            </Badge>
-                        )}
-                        {course.certificateInfo?.hasCertificate && (
-                            <Badge variant="secondary" className="gap-1.5">
-                                <Award className="h-3 w-3" />
-                                Certificate
-                            </Badge>
-                        )}
-                        {course.rating > 0 && (
-                            <Badge variant="outline" className="gap-1.5">
-                                <Award className="h-3 w-3 text-yellow-500" />
-                                {course.averageRating?.toFixed(1) || course.rating.toFixed(1)}
                             </Badge>
                         )}
                     </div>
@@ -187,53 +164,49 @@ async function CourseDetailContent({ courseId }) {
                                     </span>
                                 )}
                             </div>
-                            <Badge variant="secondary" className="capitalize">{course.pricing.subscriptionType}</Badge>
                         </div>
                     )}
 
-                    {/* Action buttons row */}
+                    {/* Actions */}
                     <div className="flex flex-wrap items-center gap-3 pt-2">
                         {(course.demoVideoId && course.demoVideo) ? (
-                            <VideoPlayer video={{ id: course.demoVideo.id, title: "Course Demo Video", thumbnailUrl: course.thumbnailImage, playbackUrl: course.demoVideo.playbackUrl, externalUrl: course.externalUrl }}>
+                            <VideoPlayer video={{ id: course.demoVideo.id, title: "Course Demo Video", thumbnailUrl: course.thumbnailImage, playbackUrl: course.demoVideo.playbackUrl }}>
                                 <Button variant="gradient" size="default" className="gap-2">
                                     <PlayCircle className="h-4 w-4" />
                                     Watch Demo
                                 </Button>
                             </VideoPlayer>
-                        ) :
-                            (<Button variant="ghost" size="default" className="gap-2">
-                                <PlayCircle className="h-4 w-4" />
-                                No Demo Video
-                            </Button>)
-                        }
-
-
-                        {course.trainer && (
-                            <AddTrainerDialog trainerId={course.trainer?.user?.id} courseId={courseId}>
-                                <Button variant="outline" size="default" className="gap-2">
-                                    <Edit className="h-4 w-4" />
-                                    {course.trainer ? "Edit" : "Add"} Trainer
-                                </Button>
-                            </AddTrainerDialog>
+                        ) : (
+                            <Button variant="ghost" size="default" className="gap-2">
+                                <PlayCircle className="h-4 w-4" /> No Demo Video
+                            </Button>
                         )}
 
                         <EditCourseDialog course={course} categories={categories} />
-
                         <CreateModuleDialog courses={courses} courseId={courseId} />
-
                         <CreateLessonDialog courses={courses} courseId={courseId} />
+
+                        <ManageWhatsappDialog courseId={courseId} whatsappLink={course.whatsappCommunityLink}>
+                            <Button variant="outline" size="default" className="gap-2 border-green-500 hover:bg-green-500/5 hover:text-green-600">
+                                <MessageCircle className="h-4 w-4 text-green-500" /> WhatsApp
+                            </Button>
+                        </ManageWhatsappDialog>
+
+                        <ManageCourseFaqDialog courseId={courseId}>
+                            <Button variant="outline" size="default" className="gap-2 border-indigo-500 hover:bg-indigo-500/5 hover:text-indigo-600">
+                                <HelpCircle className="h-4 w-4 text-indigo-500" /> FAQs
+                            </Button>
+                        </ManageCourseFaqDialog>
                     </div>
                 </div>
             </div>
 
-            {/* Separator */}
             <Separator />
-
-            {/* Tabs Section */}
             <CourseDetailTabs course={course} />
         </div>
     )
 }
+
 
 export default async function CourseDetailPage({ params }) {
     const { id } = await params
