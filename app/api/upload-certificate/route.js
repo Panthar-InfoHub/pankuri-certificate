@@ -4,8 +4,7 @@ import { NextResponse } from "next/server";
 import path from "path";
 import os from "os";
 import * as fs from 'fs/promises'
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3Client } from "@/lib/clientS3";
+import { storage } from "@/lib/gcloud";
 import { registerUser, sendMessage } from "@/lib/helper";
 
 export async function POST(request) {
@@ -147,26 +146,35 @@ export async function POST(request) {
     await browser.close();
     console.debug("\n Browser closed")
 
-    // Upload to DigitalOcean Spaces
+    // Upload to Google Cloud Storage
     const fileBuffer = await fs.readFile(tempPath);
-    const bucketName = 'pankhuri-v3';
+    const bucketName = 'certificate-pankhuri';
     const timestamp = Date.now();
     const destination = `certificates/${name.replace(/ /g, '_')}_${timestamp}.pdf`;
 
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: destination,
-      Body: fileBuffer,
-      ContentType: 'application/pdf',
-      ACL: 'public-read',
-    });
+    try {
+      const bucket = storage.bucket(bucketName);
+      const file = bucket.file(destination);
 
-    await s3Client.send(command);
-    console.debug("\nUploaded certificate to DigitalOcean Spaces successfully.");
+      await file.save(fileBuffer, {
+        metadata: {
+          contentType: 'application/pdf',
+        },
+      });
+      console.debug("\n Certificate uploaded to GCS successfully")
+    } catch (uploadError) {
+      console.error("Error uploading to GCS:", uploadError);
+      await fs.unlink(tempPath);
+      return NextResponse.json({
+        success: false,
+        message: "Error uploading certificate to storage.",
+        error: uploadError.message,
+      }, { status: 500 });
+    }
 
     await fs.unlink(tempPath);
 
-    const publicUrl = `https://pankhuri-v3.blr1.cdn.digitaloceanspaces.com/${destination}`;
+    const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
     console.debug("\n Public URL ==> ", publicUrl)
 
     // Register Student
