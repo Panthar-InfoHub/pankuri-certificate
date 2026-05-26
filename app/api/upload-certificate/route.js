@@ -6,6 +6,8 @@ import os from "os";
 import * as fs from 'fs/promises'
 import { storage } from "@/lib/gcloud";
 import { registerUser, sendMessage } from "@/lib/helper";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3Client } from "@/lib/clientS3";
 
 export async function POST(request) {
   try {
@@ -148,20 +150,24 @@ export async function POST(request) {
 
     // Upload to Google Cloud Storage
     const fileBuffer = await fs.readFile(tempPath);
-    const bucketName = 'certificate-pankhuri';
+
+    const public_bucketName = process.env.NEXT_PUBLIC_PUBLIC_BUCKET_NAME
+    const public_endpoint = process.env.NEXT_PUBLIC_PUBLIC_ASSET_ENDPOINT_URL
     const timestamp = Date.now();
-    const destination = `certificates/${name.replace(/ /g, '_')}_${timestamp}.pdf`;
+    const destination = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/certificate/${name.replace(/ /g, '_')}_${timestamp}.pdf`;
 
     try {
-      const bucket = storage.bucket(bucketName);
-      const file = bucket.file(destination);
 
-      await file.save(fileBuffer, {
-        metadata: {
-          contentType: 'application/pdf',
-        },
+      const command = new PutObjectCommand({
+        Bucket: public_bucketName,
+        Key: destination,
+        Body: fileBuffer,             // Pass the raw Node.js Buffer directly here
+        ContentType: 'application/pdf', // Ensures the browser views it natively instead of downloading it
       });
-      console.debug("\n Certificate uploaded to GCS successfully")
+
+      await s3Client.send(command);
+      console.debug("\n Certificate uploaded to R2 successfully");
+
     } catch (uploadError) {
       console.error("Error uploading to GCS:", uploadError);
       await fs.unlink(tempPath);
@@ -174,16 +180,8 @@ export async function POST(request) {
 
     await fs.unlink(tempPath);
 
-    const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+    const publicUrl = `${public_endpoint}/${destination}`;
     console.debug("\n Public URL ==> ", publicUrl)
-
-    // Register Student
-    const registerRes = await registerUser(name, phone)
-    console.debug("\n Register res ==> ", registerRes)
-
-    if (!registerRes.success) {
-      console.warn(registerRes.message)
-    }
 
     // Send WhatsApp Message
     const msgRes = await sendMessage({ phoneNo: phone, course, date, name, publicUrl })

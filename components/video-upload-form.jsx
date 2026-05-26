@@ -42,11 +42,9 @@ export function VideoUploadForm({ onSuccess }) {
             console.log("value", value)
             startTransition(async () => {
                 toast.info("Initializing upload...")
-
+                const public_bucketName = process.env.NEXT_PUBLIC_PUBLIC_BUCKET_NAME
+                const public_endpoint = process.env.NEXT_PUBLIC_PUBLIC_ASSET_ENDPOINT_URL
                 const file = value.video
-                const bucketName = "pankhuri-v3"
-                const key = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/videos/${Date.now()}_${file.name}`
-
                 try {
                     // 1. Create a multipart upload to get an UploadId
                     toast.info("Getting upload session...")
@@ -54,7 +52,10 @@ export function VideoUploadForm({ onSuccess }) {
                     const allUploadTasks = []
 
                     const videoUploadPromise = (async () => {
-                        const uploadId = await createMultipartUpload(bucketName, key, file.type)
+                        const private_bucketName = process.env.NEXT_PUBLIC_PRIVATE_BUCKET_NAME
+                        const key = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/videos/${Date.now()}_${file.name}`
+
+                        const uploadId = await createMultipartUpload(private_bucketName, key, file.type)
 
                         if (!uploadId) {
                             throw new Error("Failed to create multipart upload.")
@@ -68,7 +69,7 @@ export function VideoUploadForm({ onSuccess }) {
                         setTotalParts(calculatedTotalParts)
 
                         // console.log("\n partss ==> ", calculatedTotalParts)
-                        const presignedUrlsData = await generatePresignedUrls(bucketName, key, uploadId, calculatedTotalParts)
+                        const presignedUrlsData = await generatePresignedUrls(private_bucketName, key, uploadId, calculatedTotalParts)
 
                         // console.log("\nPresigned URLs:", presignedUrlsData)
 
@@ -85,6 +86,7 @@ export function VideoUploadForm({ onSuccess }) {
                         const uploadedParts = await Promise.all(
                             presignedUrlsData.map(async (partData, index) => {
                                 const chunk = file.slice(index * CHUNK_SIZE, (index + 1) * CHUNK_SIZE)
+
                                 const response = await axios.put(partData.url, chunk, {
                                     onUploadProgress: (progressEvent) => {
                                         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -96,40 +98,40 @@ export function VideoUploadForm({ onSuccess }) {
                                     },
                                 })
                                 console.log("\nResponse:", response.headers)
-        
+
                                 // Safe ETag extraction with fallback
                                 const etag = response.headers.etag || response.headers.ETag || response.headers['etag']
                                 if (!etag) {
                                     throw new Error(`Missing ETag for part ${partData.partNumber}`)
                                 }
-                                
+
                                 return { PartNumber: partData.partNumber, ETag: etag.replace(/"/g, "") }
                             })
                         )
                         // console.log("\nUploaded Parts:", uploadedParts)
                         // 4. Complete the multipart upload
                         toast.info("Finalizing video upload...")
-                        await completeMultipartUpload(bucketName, key, uploadId, uploadedParts)
+                        await completeMultipartUpload(private_bucketName, key, uploadId, uploadedParts)
                     })()
 
                     allUploadTasks.push(videoUploadPromise);
 
                     if (value.thumbnail) {
                         const thumbnailUploadPromise = (async () => {
+
                             const thumbnailKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/video-thumbnails/${Date.now()}_${value.thumbnail.name}`
-                            const { url } = await generatePresignedUrlForImage(bucketName, thumbnailKey, value.thumbnail.type)
+                            const { url } = await generatePresignedUrlForImage(public_bucketName, thumbnailKey, value.thumbnail.type)
                             await axios.put(url, value.thumbnail,
                                 {
                                     headers: {
                                         'Content-Type': value.thumbnail.type,
-                                        'x-amz-acl': 'public-read'
+                                        // 'x-amz-acl': 'public-read'
                                     },
                                     onUploadProgress: (progressEvent) => {
                                         setThumbnailProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
                                     },
                                 })
-                            const publicThumbnailUrl = `https://${bucketName}.blr1.digitaloceanspaces.com/${thumbnailKey}`;
-
+                            const publicThumbnailUrl = `${public_endpoint}/${thumbnailKey}`;
                             return publicThumbnailUrl;
                         })()
                         allUploadTasks.push(thumbnailUploadPromise)
@@ -153,16 +155,16 @@ export function VideoUploadForm({ onSuccess }) {
                             value.videoDescription.products.map(async (product) => {
                                 if (product.image && product.image instanceof File) {
                                     const imageKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/product-images/${Date.now()}_${product.image.name}`
-                                    const { url } = await generatePresignedUrlForImage(bucketName, imageKey, product.image.type)
+                                    const { url } = await generatePresignedUrlForImage(public_bucketName, imageKey, product.image.type)
 
                                     await axios.put(url, product.image, {
                                         headers: {
                                             'Content-Type': product.image.type,
-                                            'x-amz-acl': 'public-read'
+                                            // 'x-amz-acl': 'public-read'
                                         }
                                     })
 
-                                    const publicImageUrl = `https://${bucketName}.blr1.digitaloceanspaces.com/${imageKey}`
+                                    const publicImageUrl = `${public_endpoint}/${imageKey}`
                                     return { ...product, image: publicImageUrl }
                                 }
                                 return product

@@ -42,9 +42,32 @@ export function VideoPlayer({ isOpen, onClose, video, children }) {
                 }).finally(() => {
                     setLoading(false);
                 });
-        } else if (video.externalUrl) {
-            setSignedUrl(video.externalUrl);
-            setLoading(false);
+        }
+
+        if (video.externalUrl) {
+            // A. If it's a relative string (e.g., "manual-recordings/..."), route it through the proxy
+            if (!video.externalUrl.startsWith('http')) {
+                getVideoPlaybackUrl(video.externalUrl)
+                    .then(result => {
+                        if (!isMounted) return;
+                        if (result.success && result.url) {
+                            setSignedUrl(result.url); // Sets it cleanly to "/api/video/manual-recordings/..."
+                        } else {
+                            toast.error('Failed to load video');
+                            effectiveOnClose();
+                        }
+                    }).catch(error => {
+                        console.error('Error proxying external URL:', error);
+                        if (!isMounted) return;
+                        toast.error('Failed to load video');
+                    }).finally(() => {
+                        if (isMounted) setLoading(false);
+                    });
+            } else {
+                // B. If it's a legacy absolute link (e.g., "https://..."), play it directly
+                setSignedUrl(video.externalUrl);
+                setLoading(false);
+            }
             return;
         }
         return () => { isMounted = false; };

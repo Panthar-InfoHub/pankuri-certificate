@@ -67,19 +67,20 @@ export function CreateCategoryDialog({
                     // Upload icon if file is selected
                     if (imageFile) {
                         toast.info("Uploading icon...")
-                        const bucketName = "pankhuri-v3"
+                        const public_bucketName = process.env.NEXT_PUBLIC_PUBLIC_BUCKET_NAME
+                        const public_endpoint = process.env.NEXT_PUBLIC_PUBLIC_ASSET_ENDPOINT_URL
                         const iconKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/category-icons/${Date.now()}_${imageFile.name}`
 
-                        const { url } = await generatePresignedUrlForImage(bucketName, iconKey, imageFile.type)
+                        const { url } = await generatePresignedUrlForImage(public_bucketName, iconKey, imageFile.type)
 
                         await axios.put(url, imageFile, {
                             headers: {
                                 'Content-Type': imageFile.type,
-                                'x-amz-acl': 'public-read'
+                                // 'x-amz-acl': 'public-read'
                             },
                         })
 
-                        iconUrl = `https://${bucketName}.blr1.digitaloceanspaces.com/${iconKey}`
+                        iconUrl = `${public_endpoint}/${iconKey}`
                         toast.success("Icon uploaded successfully")
                     }
 

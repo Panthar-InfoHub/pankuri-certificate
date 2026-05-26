@@ -42,12 +42,12 @@ import z from "zod"
 //   onCancel    — called when the user dismisses the form
 //   cancelLabel — label for the dismiss button (default "Cancel")
 // ─────────────────────────────────────────────────────────────────────────────
-export function CourseFormContent({ categories, trainers = [], onSuccess, onCancel, cancelLabel = "Cancel" }) {
+export function CourseFormContent({ categories, trainers = [], onSuccess, onCancel, cancelLabel = "Cancel" }: any) {
     const [isPending, startTransition] = useTransition()
     const [thumbnailPreview, setThumbnailPreview] = useState("")
-    const [thumbnailFile, setThumbnailFile] = useState(null)
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
     const [coverPreview, setCoverPreview] = useState("")
-    const [coverFile, setCoverFile] = useState(null)
+    const [coverFile, setCoverFile] = useState<File | null>(null)
 
     const form = useForm({
         defaultValues: {
@@ -62,8 +62,8 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
             duration: 0,
             language: "en",
             hasPricing: false,
-            price: null,
-            discountedPrice: null,
+            price: undefined,
+            discountedPrice: undefined,
             hasCertificate: false,
             tags: [],
             demoVideoId: "",
@@ -76,22 +76,23 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
                 try {
                     let thumbnailUrl = value.thumbnailImage
                     let coverUrl = value.coverImage
-                    const bucketName = "pankhuri-v3"
+                    const public_bucketName = process.env.NEXT_PUBLIC_PUBLIC_BUCKET_NAME
+                    const public_endpoint = process.env.NEXT_PUBLIC_PUBLIC_ASSET_ENDPOINT_URL
 
                     // Upload thumbnail if selected
                     if (thumbnailFile) {
                         toast.info("Uploading thumbnail...")
                         const thumbnailKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/course-thumbnails/${Date.now()}_${thumbnailFile.name}`
-                        const { url } = await generatePresignedUrlForImage(bucketName, thumbnailKey, thumbnailFile.type)
+                        const { url } = await generatePresignedUrlForImage(public_bucketName, thumbnailKey, thumbnailFile.type)
 
                         await axios.put(url, thumbnailFile, {
                             headers: {
                                 'Content-Type': thumbnailFile.type,
-                                'x-amz-acl': 'public-read'
+                                // 'x-amz-acl': 'public-read'
                             },
                         })
 
-                        thumbnailUrl = `https://${bucketName}.blr1.digitaloceanspaces.com/${thumbnailKey}`
+                        thumbnailUrl = `${public_endpoint}/${thumbnailKey}`
                         toast.success("Thumbnail uploaded successfully")
                     }
 
@@ -99,16 +100,16 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
                     if (coverFile) {
                         toast.info("Uploading cover image...")
                         const coverKey = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/course-covers/${Date.now()}_${coverFile.name}`
-                        const { url } = await generatePresignedUrlForImage(bucketName, coverKey, coverFile.type)
+                        const { url } = await generatePresignedUrlForImage(public_bucketName, coverKey, coverFile.type)
 
                         await axios.put(url, coverFile, {
                             headers: {
                                 'Content-Type': coverFile.type,
-                                'x-amz-acl': 'public-read'
+                                // 'x-amz-acl': 'public-read'
                             },
                         })
 
-                        coverUrl = `https://${bucketName}.blr1.digitaloceanspaces.com/${coverKey}`
+                        coverUrl = `${public_endpoint}/${coverKey}`
                         toast.success("Cover image uploaded successfully")
                     }
 
@@ -117,8 +118,8 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
                         ...value,
                         thumbnailImage: thumbnailUrl,
                         coverImage: coverUrl,
-                        price: value.hasPricing && value.price * 100,
-                        discountedPrice: value.hasPricing && value.discountedPrice * 100
+                        price: value.hasPricing && value.price ? value.price * 100 : undefined,
+                        discountedPrice: value.hasPricing && value.discountedPrice ? value.discountedPrice * 100 : undefined
                     })
 
                     if (result.success) {
@@ -134,7 +135,7 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
                     } else {
                         toast.warning(result.error || "Failed to create course")
                     }
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Error creating course:", error)
                     toast.error(error.message || "An unexpected error occurred")
                 }
@@ -154,7 +155,7 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
         form.setFieldValue("coverImage", "")
     }
 
-    const handleTitleChange = (value) => {
+    const handleTitleChange = (value: any) => {
         const slug = value
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, "")
@@ -327,7 +328,7 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
                                 <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent>
-                                {categories.map((cat) => (
+                                {categories.map((cat: any) => (
                                     <SelectItem key={cat.id} value={cat.id}>
                                         {cat.name}
                                     </SelectItem>
@@ -349,7 +350,7 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
                                 <SelectValue placeholder="Select trainer" />
                             </SelectTrigger>
                             <SelectContent>
-                                {trainers.map((trainer) => (
+                                {trainers.map((trainer: any) => (
                                     <SelectItem key={trainer.id} value={trainer.id}>
                                         {trainer.user.displayName}
                                     </SelectItem>
@@ -368,7 +369,7 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
                         <FieldLabel htmlFor="demoVideoId">Demo Video (Optional)</FieldLabel>
                         <VideoCombobox
                             value={field.state.value}
-                            onValueChange={(value) => field.handleChange(value)}
+                            onValueChange={(value: any) => field.handleChange(value)}
                             disabled={isPending}
                         />
                         <p className="text-xs text-muted-foreground mt-1">
@@ -561,7 +562,7 @@ export function CourseFormContent({ categories, trainers = [], onSuccess, onCanc
 // ─────────────────────────────────────────────────────────────────────────────
 // CreateCourseDialog — standalone dialog wrapper (unchanged public API).
 // ─────────────────────────────────────────────────────────────────────────────
-export function CreateCourseDialog({ children, categories, trainers = [] }) {
+export function CreateCourseDialog({ children, categories, trainers = [] }: any) {
     const [open, setOpen] = useState(false)
     const router = useRouter()
 
