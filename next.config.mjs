@@ -20,6 +20,11 @@ const nextConfig = {
                 pathname: "/**",
             },
             {
+                protocol: "https",
+                hostname: "pub-26bb499a653042debca0f402361c691f.r2.dev",
+                pathname: "/**",
+            },
+            {
                 protocol: "http",
                 hostname: "localhost",
                 pathname: "/**",

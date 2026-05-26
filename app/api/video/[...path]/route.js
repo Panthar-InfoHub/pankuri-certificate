@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
 
         // Fetch from Spaces
         const command = new GetObjectCommand({
-            Bucket: process.env.DO_PROCESSED_BUCKET,
+            Bucket: process.env.NEXT_PUBLIC_PRIVATE_BUCKET_NAME, // "pankhuri-private-assets",
             Key: filePath,
         });
 
