@@ -30,7 +30,6 @@ async function CoursesContent({ searchP }) {
   const courses = coursesResult.success ? coursesResult.data : []
   const categories = categoriesResult.success ? categoriesResult.data.data : []
   const trainers = trainersResult.success ? trainersResult.data : []
-
   return (
     <>
       <div className="mb-6">
@@ -62,7 +61,7 @@ async function CoursesContent({ searchP }) {
           <div className="flex items-center justify-between mb-6">
             <CourseFilter categories={categories} />
             <div className="flex gap-2">
-              <CreateContentDialog>
+              <CreateContentDialog categories={categories} trainers={trainers}>
                 <Button variant="gradient">
                   <Plus className="w-4 h-4 mr-2" />
                   Upload Content

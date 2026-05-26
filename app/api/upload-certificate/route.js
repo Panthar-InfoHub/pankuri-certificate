@@ -4,9 +4,10 @@ import { NextResponse } from "next/server";
 import path from "path";
 import os from "os";
 import * as fs from 'fs/promises'
+import { storage } from "@/lib/gcloud";
+import { registerUser, sendMessage } from "@/lib/helper";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "@/lib/clientS3";
-import { registerUser, sendMessage } from "@/lib/helper";
 
 export async function POST(request) {
   try {
@@ -147,35 +148,40 @@ export async function POST(request) {
     await browser.close();
     console.debug("\n Browser closed")
 
-    // Upload to DigitalOcean Spaces
+    // Upload to Google Cloud Storage
     const fileBuffer = await fs.readFile(tempPath);
-    const bucketName = 'pankhuri-v3';
+
+    const public_bucketName = process.env.NEXT_PUBLIC_PUBLIC_BUCKET_NAME
+    const public_endpoint = process.env.NEXT_PUBLIC_PUBLIC_ASSET_ENDPOINT_URL
     const timestamp = Date.now();
-    const destination = `certificates/${name.replace(/ /g, '_')}_${timestamp}.pdf`;
+    const destination = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/certificate/${name.replace(/ /g, '_')}_${timestamp}.pdf`;
 
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: destination,
-      Body: fileBuffer,
-      ContentType: 'application/pdf',
-      ACL: 'public-read',
-    });
+    try {
 
-    await s3Client.send(command);
-    console.debug("\nUploaded certificate to DigitalOcean Spaces successfully.");
+      const command = new PutObjectCommand({
+        Bucket: public_bucketName,
+        Key: destination,
+        Body: fileBuffer,             // Pass the raw Node.js Buffer directly here
+        ContentType: 'application/pdf', // Ensures the browser views it natively instead of downloading it
+      });
+
+      await s3Client.send(command);
+      console.debug("\n Certificate uploaded to R2 successfully");
+
+    } catch (uploadError) {
+      console.error("Error uploading to GCS:", uploadError);
+      await fs.unlink(tempPath);
+      return NextResponse.json({
+        success: false,
+        message: "Error uploading certificate to storage.",
+        error: uploadError.message,
+      }, { status: 500 });
+    }
 
     await fs.unlink(tempPath);
 
-    const publicUrl = `https://pankhuri-v3.blr1.cdn.digitaloceanspaces.com/${destination}`;
+    const publicUrl = `${public_endpoint}/${destination}`;
     console.debug("\n Public URL ==> ", publicUrl)
-
-    // Register Student
-    const registerRes = await registerUser(name, phone)
-    console.debug("\n Register res ==> ", registerRes)
-
-    if (!registerRes.success) {
-      console.warn(registerRes.message)
-    }
 
     // Send WhatsApp Message
     const msgRes = await sendMessage({ phoneNo: phone, course, date, name, publicUrl })
