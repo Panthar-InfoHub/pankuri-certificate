@@ -11,6 +11,7 @@ export function VideoPlayer({ isOpen, onClose, video, children }) {
     const [open, setOpen] = useState(false);
     const [signedUrl, setSignedUrl] = useState(null);
     const [loading, setLoading] = useState(true);
+    console.log("Video in video player ==> ", video)
 
     const effectiveOpen = typeof isOpen === 'boolean' ? isOpen : open;
     const effectiveOnClose = onClose ? onClose : () => setOpen(false);
@@ -52,6 +53,31 @@ export function VideoPlayer({ isOpen, onClose, video, children }) {
                         if (!isMounted) return;
                         if (result.success && result.url) {
                             setSignedUrl(result.url); // Sets it cleanly to "/api/video/manual-recordings/..."
+                        } else {
+                            toast.error('Failed to load video');
+                            effectiveOnClose();
+                        }
+                    }).catch(error => {
+                        console.error('Error proxying external URL:', error);
+                        if (!isMounted) return;
+                        toast.error('Failed to load video');
+                    }).finally(() => {
+                        if (isMounted) setLoading(false);
+                    });
+            } else {
+                // B. If it's a legacy absolute link (e.g., "https://..."), play it directly
+                setSignedUrl(video.externalUrl);
+                setLoading(false);
+            }
+            return;
+        }
+        if (video.storageKey) {
+            if (!video.storageKey.startsWith('http')) {
+                getVideoPlaybackUrl(video.storageKey)
+                    .then(result => {
+                        if (!isMounted) return;
+                        if (result.success && result.url) {
+                            setSignedUrl(result.url);
                         } else {
                             toast.error('Failed to load video');
                             effectiveOnClose();
