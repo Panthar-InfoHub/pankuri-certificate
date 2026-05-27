@@ -50,10 +50,10 @@ export function VideoUploadForm({ onSuccess }) {
                     toast.info("Getting upload session...")
 
                     const allUploadTasks = []
+                    const key = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/videos/${Date.now()}_${file.name}`
 
                     const videoUploadPromise = (async () => {
                         const private_bucketName = process.env.NEXT_PUBLIC_PRIVATE_BUCKET_NAME
-                        const key = `${process.env.NEXT_PUBLIC_BUCKET_MODE}/videos/${Date.now()}_${file.name}`
 
                         const uploadId = await createMultipartUpload(private_bucketName, key, file.type)
 
