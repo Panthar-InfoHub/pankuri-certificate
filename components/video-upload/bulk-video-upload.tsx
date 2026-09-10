@@ -185,7 +185,6 @@ const BulkVideoUpload = () => {
                     thumbnailUrl: thumbnailUrl || null,
                     duration: duration || null,
                     // quality: videoQuality,
-                    valid: externalUrl ? "valid" : "invalid",
                     status: externalUrl ? "ready" : status,
                     metadata: {
                         quality: videoQuality,
